@@ -1,0 +1,3135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IdeaForgr AI - App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        /* ================================================================
+           IDEAFORGR AI — DESIGN SYSTEM v4 "LIQUID METAL"
+           ----------------------------------------------------------------
+           Direction: Obsidian base. Chromium surfaces. Plasma accent heat.
+           Aurora bleeds. Grain texture. Every element has physical weight.
+           Fonts: Outfit (display, heavy) + DM Mono (mono/ui details)
+        ================================================================ */
+
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@300;400;500&display=swap');
+
+        :root {
+            /* ── Depth palette ── */
+            --bg:            #020209;
+            --bg-2:          #05050f;
+            --surface:       #080816;
+            --surface-2:     #0c0c1e;
+            --surface-3:     #111128;
+            --surface-raised: rgba(255,255,255,0.028);
+
+            /* ── Borders — chromium sheen ── */
+            --border:        rgba(255,255,255,0.05);
+            --border-2:      rgba(255,255,255,0.09);
+            --border-bright: rgba(255,255,255,0.18);
+            --border-glow:   rgba(99,102,241,0.35);
+
+            /* ── Brand plasma ── */
+            --forge:         #ff7a1a;
+            --forge-2:       #ff4d00;
+            --forge-glow:    rgba(255,122,26,0.22);
+            --indigo:        #6366f1;
+            --indigo-2:      #818cf8;
+            --indigo-glow:   rgba(99,102,241,0.2);
+            --violet:        #a78bfa;
+            --cyan:          #22d3ee;
+            --cyan-glow:     rgba(34,211,238,0.15);
+            --green:         #34d399;
+            --gold:          #fbbf24;
+            --pink:          #f472b6;
+            --red:           #f87171;
+            --red-glow:      rgba(248,113,113,0.12);
+
+            /* ── Text ── */
+            --text:          #eef0ff;
+            --text-2:        #9399b2;
+            --text-3:        #4e536b;
+
+            /* ── Gradients ── */
+            --grad-brand:    linear-gradient(135deg, #6366f1 0%, #a78bfa 100%);
+            --grad-forge:    linear-gradient(135deg, #ff7a1a 0%, #ff4d00 100%);
+            --grad-aurora:   linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #a78bfa 100%);
+            --grad-green:    linear-gradient(135deg, #34d399 0%, #06b6d4 100%);
+            --grad-gold:     linear-gradient(135deg, #fbbf24 0%, #ff7a1a 100%);
+            --grad-pink:     linear-gradient(135deg, #f472b6 0%, #a78bfa 100%);
+            --grad-chrome:   linear-gradient(180deg,
+                               rgba(255,255,255,0.06) 0%,
+                               rgba(255,255,255,0.01) 100%);
+
+            /* ── Radius tokens ── */
+            --r-xs:  6px;
+            --r-sm:  10px;
+            --r-md:  16px;
+            --r-lg:  22px;
+            --r-xl:  28px;
+            --r-2xl: 36px;
+
+            /* ── Shadows ── */
+            --shadow-sm:  0 2px 8px rgba(0,0,0,0.4);
+            --shadow-md:  0 8px 32px rgba(0,0,0,0.5);
+            --shadow-lg:  0 20px 60px rgba(0,0,0,0.6);
+            --shadow-brand: 0 8px 32px rgba(99,102,241,0.3);
+            --shadow-forge: 0 8px 32px rgba(255,122,26,0.25);
+        }
+
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        html { scroll-behavior:smooth; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            cursor: default;
+        }
+
+        /* ══════════════════════════════════════════════════════
+           WORLD-BUILDING BACKGROUND SYSTEM
+           Three layers: aurora mesh → noise grain → dot grid
+        ══════════════════════════════════════════════════════ */
+
+        /* Layer 1 — animated aurora orbs */
+        body::before {
+            content: "";
+            position: fixed; inset: 0; z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse 70% 55% at 15% 0%,
+                    rgba(99,102,241,0.18) 0%, transparent 65%),
+                radial-gradient(ellipse 55% 45% at 88% 15%,
+                    rgba(255,122,26,0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 60% at 50% 95%,
+                    rgba(167,139,250,0.10) 0%, transparent 55%),
+                radial-gradient(ellipse 30% 35% at 75% 60%,
+                    rgba(34,211,238,0.07) 0%, transparent 50%);
+            animation: auroraShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes auroraShift {
+            0%   { opacity: 0.8; transform: scale(1)     translateY(0px); }
+            50%  { opacity: 1;   transform: scale(1.04)  translateY(-12px); }
+            100% { opacity: 0.7; transform: scale(0.98)  translateY(6px); }
+        }
+
+        /* Layer 2 — film grain texture via SVG turbulence */
+        body::after {
+            content: "";
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            opacity: 0.035;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+            background-size: 180px 180px;
+        }
+
+        /* Fixed ambient orbs — decorative, behind everything */
+        .orb {
+            position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+            filter: blur(80px); opacity: 0.12;
+        }
+        .orb-1 {
+            width: 500px; height: 500px; top: -120px; left: -100px;
+            background: radial-gradient(circle, #6366f1, transparent 70%);
+            animation: orbDrift1 25s ease-in-out infinite alternate;
+        }
+        .orb-2 {
+            width: 400px; height: 400px; top: 20%; right: -80px;
+            background: radial-gradient(circle, #ff7a1a, transparent 70%);
+            animation: orbDrift2 30s ease-in-out infinite alternate;
+        }
+        .orb-3 {
+            width: 350px; height: 350px; bottom: -60px; left: 30%;
+            background: radial-gradient(circle, #a78bfa, transparent 70%);
+            animation: orbDrift3 22s ease-in-out infinite alternate;
+        }
+        @keyframes orbDrift1 {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(40px, 30px) scale(1.1); }
+        }
+        @keyframes orbDrift2 {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(-30px, 50px) scale(0.9); }
+        }
+        @keyframes orbDrift3 {
+            from { transform: translate(0, 0) scale(1); }
+            to   { transform: translate(20px, -40px) scale(1.05); }
+        }
+
+        /* Fine dot matrix — only top region */
+        .grid-overlay {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+            background-size: 24px 24px;
+            mask-image: linear-gradient(to bottom, black 0%, transparent 40%);
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 40%);
+        }
+
+        /* ══════════════════════════════════════════════════════
+           INTRO ANIMATION
+        ══════════════════════════════════════════════════════ */
+        #intro-bg    { position:fixed; inset:0; background:var(--bg); z-index:9998; }
+        #intro-scene { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; pointer-events:none; perspective:1000px; }
+        #flash       { position:absolute; inset:0; background:#fff; opacity:0; z-index:100; }
+        #shockwave   { position:absolute; top:50%; left:50%; width:10px; height:10px; border-radius:50%; border:2px solid var(--forge); transform:translate(-50%,-50%); opacity:0; z-index:5; }
+        #glowing-point { position:absolute; top:50%; left:50%; width:40px; height:12px; background:#fff; border-radius:50%; box-shadow:0 0 40px 15px var(--forge), 0 0 80px 30px #ff4d00; transform:translate(-50%,-50%); }
+        #hammer-wrapper { position:absolute; bottom:50%; left:50%; transform:translate(-50%,0); transform-origin:bottom center; z-index:50; }
+        #particles-container { position:absolute; top:50%; left:50%; width:0; height:0; z-index:10; }
+        .particle { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); }
+        .shape-circle   { border-radius:50%; }
+        .shape-square   { border-radius:2px; }
+        .shape-triangle { clip-path:polygon(50% 0%,0% 100%,100% 100%); }
+
+        #logo-text {
+            font-family:'Outfit',sans-serif; font-size:4.8rem; font-weight:900;
+            letter-spacing:-3px; margin:0; white-space:nowrap;
+            display:flex; align-items:center; gap:16px;
+        }
+        .ai-text {
+            background: linear-gradient(135deg, #818cf8, #c084fc, #ff7a1a);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            filter:drop-shadow(0 0 28px rgba(167,139,250,0.5));
+        }
+        #logo-accent {
+            position:absolute; top:50%; left:50%; width:14px; height:14px;
+            background:var(--forge); transform-origin:center;
+            clip-path:polygon(50% 0%,100% 50%,50% 100%,0% 50%);
+            box-shadow:0 0 24px var(--forge); z-index:45;
+        }
+
+        #skip-intro {
+            position:fixed; bottom:32px; right:32px; z-index:10001;
+            background:rgba(255,255,255,0.03); border:1px solid var(--border-2);
+            color:var(--text-2); padding:9px 24px; border-radius:40px;
+            font-family:'Outfit',sans-serif; font-size:0.82rem; font-weight:500;
+            cursor:pointer; backdrop-filter:blur(16px); transition:all 0.3s; opacity:0;
+            letter-spacing:0.5px;
+        }
+        #skip-intro:hover { background:rgba(255,255,255,0.08); color:var(--text); }
+
+        #badge-container { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); display:flex; align-items:center; gap:14px; z-index:10000; pointer-events:none; }
+        .badge-text {
+            font-family:'Outfit',sans-serif; font-weight:800; font-size:1.5rem;
+            color:var(--text); white-space:nowrap; letter-spacing:-0.5px; opacity:0;
+        }
+
+        /* ══════════════════════════════════════════════════════
+           NAVIGATION
+        ══════════════════════════════════════════════════════ */
+        #app-container {
+            position:relative; width:100%; height:100vh; overflow-y:auto;
+            opacity:0; transform:translateY(28px);
+        }
+
+        nav {
+            position:fixed; top:0; left:0; width:100%; height:66px; z-index:9000;
+            display:flex; align-items:center; justify-content:space-between;
+            padding:0 5vw;
+            /* Sophisticated glass */
+            background: rgba(2,2,9,0.72);
+            backdrop-filter: blur(28px) saturate(200%) brightness(1.1);
+            -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(1.1);
+            border-bottom: 1px solid var(--border);
+            /* layered shadow with brand hue */
+            box-shadow:
+                0 1px 0 rgba(255,255,255,0.04),
+                0 12px 40px rgba(0,0,0,0.5),
+                0 1px 80px rgba(99,102,241,0.06);
+        }
+
+        /* Prismatic top line — the signature accent */
+        nav::before {
+            content:"";
+            position:absolute; top:0; left:0; right:0; height:1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--indigo) 15%,
+                var(--violet) 40%,
+                var(--cyan)   60%,
+                var(--forge)  80%,
+                transparent  100%);
+            opacity: 0.7;
+        }
+
+        .nav-right { display:flex; align-items:center; gap:8px; }
+
+        .nav-chip {
+            font-family:'DM Mono',monospace; font-size:0.68rem; font-weight:400;
+            padding:4px 11px; border-radius:20px;
+            border:1px solid var(--border-2); color:var(--text-3);
+            background:rgba(255,255,255,0.025);
+            letter-spacing:0.6px; text-transform:uppercase;
+        }
+
+        #guide-btn {
+            font-family:'Outfit',sans-serif; font-size:0.78rem; font-weight:600;
+            padding:6px 16px; border-radius:20px; cursor:pointer; letter-spacing:0.3px;
+            border:1px solid var(--border-2);
+            background:rgba(255,255,255,0.03);
+            color:var(--text-2); transition:all 0.2s;
+        }
+        #guide-btn:hover {
+            background:var(--indigo-glow); border-color:var(--border-glow);
+            color:var(--indigo-2); box-shadow:0 0 20px rgba(99,102,241,0.15);
+        }
+
+        /* ══════════════════════════════════════════════════════
+           LAYOUT
+        ══════════════════════════════════════════════════════ */
+        #main-content {
+            position:relative; z-index:1;
+            padding:82px 5vw 80px;
+            display:grid;
+            grid-template-columns:1fr 308px;
+            gap:20px;
+            align-items:start;
+            min-height:100vh;
+        }
+
+        /* ══════════════════════════════════════════════════════
+           CHAT COLUMN
+        ══════════════════════════════════════════════════════ */
+        .chat-column { display:flex; flex-direction:column; gap:11px; }
+
+        .action-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+        #create-idea {
+            font-family:'Outfit',sans-serif; font-weight:700; font-size:0.85rem;
+            letter-spacing:0.2px; cursor:pointer; color:#fff;
+            border:none; padding:8px 20px; border-radius:var(--r-md);
+            background:var(--grad-brand);
+            box-shadow:0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition:all 0.22s cubic-bezier(0.22,1,0.36,1);
+            position:relative; overflow:hidden;
+        }
+        #create-idea::after {
+            content:"";
+            position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(255,255,255,0.18) 0%,transparent 60%);
+            opacity:0; transition:opacity 0.2s;
+        }
+        #create-idea:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(99,102,241,0.55), inset 0 1px 0 rgba(255,255,255,0.2); }
+        #create-idea:hover::after { opacity:1; }
+        #create-idea:active { transform:scale(0.97); }
+
+        #clear-data {
+            font-family:'Outfit',sans-serif; font-size:0.82rem; font-weight:500;
+            padding:8px 16px; border-radius:var(--r-md); cursor:pointer;
+            background:transparent; color:rgba(248,113,113,0.65);
+            border:1px solid rgba(248,113,113,0.18); transition:all 0.2s;
+        }
+        #clear-data:hover { background:var(--red-glow); border-color:rgba(248,113,113,0.4); color:var(--red); }
+
+        /* ── Idea Tabs ── */
+        #ideas-tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+        #ideas-tabs::-webkit-scrollbar { display:none; }
+
+        .idea-tab {
+            position:relative; cursor:pointer;
+            font-family:'Outfit',sans-serif; font-weight:600; font-size:0.84rem;
+            padding:7px 18px; border-radius:var(--r-sm); white-space:nowrap;
+            min-width:108px; text-align:center;
+            display:flex; align-items:center; justify-content:center; gap:8px;
+            background:rgba(80,10,10,0.35); border:1px solid rgba(248,113,113,0.1);
+            color:rgba(255,255,255,0.55);
+            backdrop-filter:blur(6px);
+            transition:all 0.2s cubic-bezier(0.22,1,0.36,1);
+        }
+        .idea-tab:hover { background:rgba(120,20,20,0.55); border-color:rgba(248,113,113,0.2); color:rgba(255,255,255,0.85); }
+        .idea-tab.active {
+            background:linear-gradient(135deg, #c0392b, #e74c3c);
+            border-color:rgba(255,100,100,0.45);
+            color:#fff;
+            box-shadow:0 4px 20px rgba(231,76,60,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+
+        /* ── Sub Tabs ── */
+        #subtabs-bar { display:flex; gap:5px; flex-wrap:wrap; }
+
+        .sub-tab {
+            cursor:pointer; font-family:'Outfit',sans-serif; font-size:0.8rem; font-weight:500;
+            padding:5px 13px; border-radius:var(--r-xs);
+            display:flex; align-items:center; gap:5px;
+            background:rgba(255,255,255,0.03); border:1px solid var(--border);
+            color:var(--text-3); transition:all 0.18s;
+        }
+        .sub-tab:hover { background:rgba(255,255,255,0.06); border-color:var(--border-2); color:var(--text-2); }
+        .sub-tab.active {
+            background:var(--indigo-glow); border-color:rgba(99,102,241,0.38);
+            color:var(--indigo-2);
+            box-shadow:inset 0 0 0 1px rgba(99,102,241,0.15);
+        }
+        .add-sub-tab { padding:5px 11px; font-weight:700; font-size:0.9rem; }
+
+        .del-btn {
+            opacity:0; width:14px; height:14px; border-radius:50%; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            background:rgba(0,0,0,0.35); font-size:10px;
+            color:rgba(255,255,255,0.5); border:none; cursor:pointer;
+            transition:all 0.15s;
+        }
+        .idea-tab:hover .del-btn, .sub-tab:hover .del-btn { opacity:1; }
+        .del-btn:hover { background:var(--red); color:#fff; transform:scale(1.15); }
+
+        /* ── Output wrapper ── */
+        #output-wrapper {
+            display:none; max-height:430px; overflow-y:auto;
+            border-radius:var(--r-xl); padding:20px 22px;
+            background:var(--surface);
+            border:1px solid var(--border-2);
+            /* Chromium sheen on top edge */
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.06),
+                0 4px 40px rgba(0,0,0,0.45);
+            animation:slideUp 0.3s cubic-bezier(0.22,1,0.36,1);
+            position:relative;
+        }
+        /* inner glow top bar */
+        #output-wrapper::before {
+            content:""; pointer-events:none;
+            position:absolute; top:0; left:15%; right:15%; height:1px;
+            background:linear-gradient(90deg, transparent, rgba(99,102,241,0.5), transparent);
+        }
+        #output { display:flex; flex-direction:column; gap:12px; }
+
+        /* ── Messages ── */
+        .msg {
+            max-width:82%; padding:12px 16px; border-radius:18px;
+            line-height:1.6; font-size:0.89rem; word-wrap:break-word;
+            font-weight:400;
+            animation:msgIn 0.28s cubic-bezier(0.22,1,0.36,1);
+        }
+        @keyframes msgIn {
+            from { opacity:0; transform:translateY(10px) scale(0.97); }
+            to   { opacity:1; transform:translateY(0)    scale(1); }
+        }
+        .msg-user {
+            align-self:flex-end;
+            background:var(--grad-brand);
+            color:#fff; border-bottom-right-radius:4px;
+            box-shadow:0 4px 24px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .msg-ai {
+            align-self:flex-start;
+            background:var(--surface-2); border:1px solid var(--border-2);
+            border-bottom-left-radius:4px; color:var(--text);
+        }
+        .msg-ai strong { color:#fff; font-weight:700; }
+        .msg-ai code {
+            background:rgba(99,102,241,0.13); color:var(--indigo-2);
+            padding:2px 7px; border-radius:5px; font-size:0.85em;
+            font-family:'DM Mono',monospace; border:1px solid rgba(99,102,241,0.22);
+        }
+
+        /* Typing dots */
+        .typing-dots { display:inline-flex; gap:5px; align-items:center; padding:2px 0; }
+        .typing-dots span {
+            width:6px; height:6px; border-radius:50%;
+            background:var(--indigo-2); opacity:0.3;
+            animation:tdot 1.4s ease-in-out infinite;
+        }
+        .typing-dots span:nth-child(2) { animation-delay:0.18s; }
+        .typing-dots span:nth-child(3) { animation-delay:0.36s; }
+        @keyframes tdot {
+            0%,60%,100% { opacity:0.2; transform:scale(0.75); }
+            30%          { opacity:1;   transform:scale(1.3); }
+        }
+
+        /* ══════════════════════════════════════════════════════
+           INPUT AREA
+        ══════════════════════════════════════════════════════ */
+        .input-box {
+            position:relative;
+            background:var(--surface);
+            border:1px solid var(--border-2);
+            border-radius:var(--r-xl); padding:13px 15px;
+            display:flex; align-items:flex-end; gap:10px;
+            transition:border-color 0.3s, box-shadow 0.3s;
+            /* Subtle inner chrome */
+            box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), var(--shadow-md);
+        }
+        .input-box:focus-within {
+            border-color:rgba(99,102,241,0.45);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.06),
+                0 0 0 3px rgba(99,102,241,0.07),
+                0 8px 40px rgba(0,0,0,0.3);
+        }
+        /* glow slit at bottom when focused */
+        .input-box::after {
+            content:"";
+            position:absolute; bottom:-1px; left:25%; right:25%; height:1px;
+            background:var(--grad-brand);
+            opacity:0; transition:opacity 0.35s;
+            border-radius:1px;
+        }
+        .input-box:focus-within::after { opacity:0.65; }
+
+        #plus-btn {
+            flex-shrink:0; margin-bottom:2px;
+            width:36px; height:36px; border-radius:var(--r-sm);
+            background:rgba(255,255,255,0.04); border:1px solid var(--border-2);
+            color:var(--text-3); font-size:1.3rem; font-weight:400;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:all 0.22s cubic-bezier(0.22,1,0.36,1);
+        }
+        #plus-btn:hover {
+            background:var(--indigo-glow); border-color:var(--border-glow);
+            color:var(--indigo-2); transform:rotate(45deg) scale(1.05);
+            box-shadow:0 0 16px rgba(99,102,241,0.2);
+        }
+
+        /* Dropdown */
+        .dropdown-menu {
+            position:absolute; bottom:calc(100% + 12px); left:0;
+            background:var(--surface-2);
+            border:1px solid var(--border-2);
+            border-radius:var(--r-lg); padding:6px;
+            box-shadow:
+                var(--shadow-lg),
+                0 0 0 1px rgba(99,102,241,0.07),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            display:none; flex-direction:column; gap:2px; z-index:1000; min-width:230px;
+            animation:dropIn 0.2s cubic-bezier(0.22,1,0.36,1);
+        }
+        @keyframes dropIn {
+            from { opacity:0; transform:translateY(8px) scale(0.96); }
+            to   { opacity:1; transform:translateY(0)   scale(1); }
+        }
+        .dropdown-item {
+            background:transparent; border:none; color:var(--text-2);
+            padding:9px 14px; border-radius:var(--r-sm); cursor:pointer;
+            font-family:'Outfit',sans-serif; font-size:0.87rem; font-weight:500;
+            transition:all 0.15s; display:flex; align-items:center; gap:10px;
+            letter-spacing:0.1px;
+        }
+        .dropdown-item:hover {
+            background:var(--indigo-glow); color:var(--indigo-2);
+            transform:translateX(3px);
+        }
+        .dropdown-separator { height:1px; background:var(--border); margin:4px 6px; }
+
+        textarea {
+            width:100%; background:transparent; border:none;
+            color:var(--text); font-family:'Outfit',sans-serif;
+            font-size:0.95rem; line-height:1.6; resize:none; outline:none;
+            min-height:50px; max-height:180px; padding-top:4px;
+        }
+        textarea::placeholder { color:var(--text-3); }
+
+        .input-footer { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; }
+        .input-hint { font-family:'DM Mono',monospace; font-size:0.66rem; color:var(--text-3); letter-spacing:0.3px; }
+
+        #ask-btn {
+            flex-shrink:0; cursor:pointer; color:#fff; border:none;
+            padding:9px 22px; border-radius:var(--r-md);
+            font-family:'Outfit',sans-serif; font-weight:700; font-size:0.88rem;
+            background:var(--grad-brand);
+            box-shadow:0 4px 20px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+            transition:all 0.22s cubic-bezier(0.22,1,0.36,1);
+            display:flex; align-items:center; gap:8px; position:relative; overflow:hidden;
+        }
+        #ask-btn::after {
+            content:"";
+            position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%);
+            opacity:0; transition:opacity 0.2s;
+        }
+        #ask-btn:hover:not(:disabled) {
+            transform:translateY(-2px);
+            box-shadow:0 8px 32px rgba(99,102,241,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        #ask-btn:hover::after { opacity:1; }
+        #ask-btn:active:not(:disabled) { transform:scale(0.97); }
+        #ask-btn:disabled { opacity:0.35; cursor:not-allowed; transform:none; filter:grayscale(0.3); }
+
+        /* Mode bar */
+        #active-mode-bar { display:none; align-items:center; gap:8px; padding:2px 0; }
+        #active-mode-bar.visible { display:flex; }
+        .mode-tag {
+            display:inline-flex; align-items:center; gap:6px;
+            background:var(--indigo-glow); border:1px solid rgba(99,102,241,0.3);
+            color:var(--indigo-2); padding:3px 11px 3px 9px; border-radius:20px;
+            font-size:0.77rem; font-weight:600; letter-spacing:0.2px;
+        }
+        #clear-mode {
+            background:transparent; border:none; color:var(--text-3);
+            cursor:pointer; font-size:1rem; padding:0 2px; transition:color 0.18s;
+        }
+        #clear-mode:hover { color:var(--red); }
+
+        /* ══════════════════════════════════════════════════════
+           WORKSPACE PANEL
+        ══════════════════════════════════════════════════════ */
+        #workspace-panel {
+            position:sticky; top:82px;
+            max-height:calc(100vh - 106px); overflow-y:auto;
+            border-radius:var(--r-xl); padding:16px;
+            display:flex; flex-direction:column; gap:11px;
+            background:var(--surface);
+            border:1px solid var(--border-2);
+            /* Deep shadow + faint right-side brand haze */
+            box-shadow:
+                var(--shadow-lg),
+                inset 0 1px 0 rgba(255,255,255,0.05),
+                -8px 0 60px rgba(99,102,241,0.04);
+        }
+
+        /* Prismatic top line matching nav */
+        #workspace-panel::before {
+            content:""; pointer-events:none;
+            position:absolute; top:0; left:18px; right:18px; height:1px;
+            background:linear-gradient(90deg, transparent, var(--indigo) 30%, var(--forge) 70%, transparent);
+            opacity:0.5; border-radius:1px;
+        }
+
+        .workspace-header {
+            font-family:'DM Mono',monospace; font-size:0.66rem; font-weight:500;
+            text-transform:uppercase; letter-spacing:2.5px; color:var(--text-3);
+            display:flex; align-items:center; gap:10px; padding-top:4px;
+        }
+        /* live indicator dot */
+        .workspace-header::before {
+            content:"";
+            width:6px; height:6px; border-radius:50%; flex-shrink:0;
+            background:var(--forge);
+            box-shadow:0 0 8px var(--forge);
+            animation:pulse 2.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50%      { opacity:0.5; transform:scale(0.75); }
+        }
+
+        /* Tool grid */
+        .tool-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+
+        .tool-btn {
+            border:none; border-radius:var(--r-md); padding:11px 8px; color:#fff;
+            cursor:pointer; font-family:'Outfit',sans-serif; font-weight:700;
+            font-size:0.78rem; letter-spacing:0.2px;
+            transition:all 0.22s cubic-bezier(0.22,1,0.36,1);
+            display:flex; flex-direction:column; align-items:center; gap:4px;
+            position:relative; overflow:hidden;
+        }
+        /* Chrome sheen */
+        .tool-btn::before {
+            content:"";
+            position:absolute; top:0; left:0; right:0; height:50%;
+            background:linear-gradient(180deg,rgba(255,255,255,0.12) 0%,transparent 100%);
+            border-radius:inherit;
+        }
+        /* Ripple ring on hover */
+        .tool-btn::after {
+            content:"";
+            position:absolute; inset:0; border-radius:inherit;
+            box-shadow:inset 0 0 0 0px rgba(255,255,255,0.3);
+            transition:box-shadow 0.3s;
+        }
+        .tool-btn:hover { transform:translateY(-4px) scale(1.03); filter:brightness(1.15); }
+        .tool-btn:hover::after { box-shadow:inset 0 0 0 1px rgba(255,255,255,0.18); }
+        .tool-btn:active { transform:scale(0.96); filter:brightness(0.9); }
+        .tool-btn .tool-icon { font-size:1.2rem; }
+
+        .tool-btn.research { background:linear-gradient(135deg,#1d4ed8,#0891b2); box-shadow:0 5px 18px rgba(29,78,216,0.45); }
+        .tool-btn.logo     { background:var(--grad-pink);    box-shadow:0 5px 18px rgba(244,114,182,0.4); }
+        .tool-btn.summary  { background:var(--grad-gold);    box-shadow:0 5px 18px rgba(251,191,36,0.4); }
+        .tool-btn.names    { background:var(--grad-green);   box-shadow:0 5px 18px rgba(52,211,153,0.4); }
+        .tool-btn.pitch    { background:var(--grad-forge);   box-shadow:0 5px 18px rgba(255,122,26,0.45); }
+        .tool-btn.swot     { background:var(--grad-aurora);  box-shadow:0 5px 18px rgba(99,102,241,0.4); }
+
+        /* Workspace status */
+        #workspace-content {
+            background:rgba(255,255,255,0.02);
+            border:1px solid var(--border);
+            border-radius:var(--r-sm); padding:12px;
+            font-size:0.8rem; line-height:1.65; color:var(--text-3);
+            min-height:52px; max-height:130px; overflow:hidden;
+            position:relative; transition:all 0.3s;
+            font-family:'Outfit',sans-serif;
+        }
+        #workspace-content.has-content { color:var(--text-2); }
+        #workspace-content.has-content::after {
+            content:""; position:absolute; bottom:0; left:0; right:0; height:38px;
+            background:linear-gradient(transparent, var(--surface));
+            border-radius:0 0 var(--r-sm) var(--r-sm); pointer-events:none;
+        }
+
+        .ws-view-full {
+            display:block; width:100%; text-align:center; padding:5px 8px;
+            font-size:0.77rem; font-weight:600; color:var(--indigo-2);
+            background:transparent; border:none; border-radius:var(--r-sm);
+            cursor:pointer; transition:background 0.18s; letter-spacing:0.2px;
+        }
+        .ws-view-full:hover { background:var(--indigo-glow); }
+
+        /* Spinner */
+        .ws-spinner {
+            display:inline-block; width:15px; height:15px; border-radius:50%;
+            border:2px solid rgba(255,255,255,0.08);
+            border-top-color:var(--forge);
+            animation:spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* ── Saved results ── */
+        #saved-results { display:flex; flex-direction:column; gap:5px; }
+
+        .saved-entry { display:flex; align-items:center; gap:5px; }
+
+        .saved-btn {
+            flex:1; text-align:left; cursor:pointer; color:var(--text);
+            font-family:'Outfit',sans-serif; font-size:0.79rem; font-weight:500;
+            padding:9px 12px; border-radius:var(--r-sm);
+            background:rgba(255,255,255,0.025); border:1px solid var(--border);
+            display:flex; align-items:center; gap:8px;
+            transition:all 0.18s;
+        }
+        .saved-btn:hover {
+            background:var(--indigo-glow); border-color:rgba(99,102,241,0.3);
+            transform:translateX(2px);
+        }
+        .saved-title { flex:1; }
+        .saved-label { font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--text-3); flex-shrink:0; }
+
+        .saved-del {
+            flex-shrink:0; background:transparent; border:none; cursor:pointer;
+            color:var(--text-3); font-size:0.9rem; padding:4px 6px; border-radius:var(--r-xs);
+            transition:all 0.15s; line-height:1;
+        }
+        .saved-del:hover { background:var(--red-glow); color:var(--red); }
+
+        /* ══════════════════════════════════════════════════════
+           POPUP MODAL
+        ══════════════════════════════════════════════════════ */
+        #result-popup {
+            position:fixed; inset:0; z-index:99999;
+            background:rgba(0,0,0,0.82);
+            backdrop-filter:blur(10px);
+            display:none; align-items:center; justify-content:center;
+        }
+
+        #popup-box {
+            width:660px; max-width:94vw; max-height:86vh;
+            background:var(--surface-2);
+            border-radius:var(--r-xl); padding:24px;
+            display:flex; flex-direction:column; gap:16px;
+            border:1px solid var(--border-2);
+            box-shadow:
+                var(--shadow-lg),
+                inset 0 1px 0 rgba(255,255,255,0.07);
+            animation:popIn 0.24s cubic-bezier(0.34,1.5,0.64,1);
+        }
+        @keyframes popIn {
+            from { opacity:0; transform:scale(0.88) translateY(16px); }
+            to   { opacity:1; transform:scale(1)    translateY(0); }
+        }
+
+        #popup-header {
+            display:flex; justify-content:space-between; align-items:center;
+            padding-bottom:14px; border-bottom:1px solid var(--border);
+        }
+        #popup-title {
+            font-family:'Outfit',sans-serif; font-weight:800; font-size:1rem;
+            color:var(--text); letter-spacing:-0.3px;
+        }
+        .popup-header-btns { display:flex; gap:7px; }
+        .popup-header-btns button {
+            background:rgba(255,255,255,0.04); border:1px solid var(--border-2);
+            color:var(--text-2); padding:5px 14px; border-radius:var(--r-sm);
+            cursor:pointer; font-family:'Outfit',sans-serif;
+            font-size:0.79rem; font-weight:600; transition:all 0.15s;
+        }
+        .popup-header-btns button:hover { background:rgba(255,255,255,0.09); color:var(--text); }
+
+        #popup-content {
+            overflow-y:auto; line-height:1.72;
+            font-size:0.91rem; color:var(--text);
+            font-family:'Outfit',sans-serif;
+        }
+        #popup-content strong { color:#fff; font-weight:700; }
+        #popup-content h2 {
+            font-size:0.98rem; font-weight:800; color:#fff; margin:16px 0 6px;
+            padding-left:11px; border-left:3px solid var(--indigo);
+            letter-spacing:-0.2px;
+        }
+        #popup-content h3 { font-size:0.88rem; color:var(--text-2); margin:12px 0 4px; font-weight:700; }
+        #popup-content ul, #popup-content ol { padding-left:20px; margin:8px 0; }
+        #popup-content li { margin-bottom:5px; }
+        #popup-content code {
+            background:rgba(99,102,241,0.1); color:var(--indigo-2);
+            padding:2px 7px; border-radius:5px; font-size:0.84em;
+            font-family:'DM Mono',monospace; border:1px solid rgba(99,102,241,0.2);
+        }
+        #popup-content hr { border:none; border-top:1px solid var(--border); margin:14px 0; }
+
+        /* ══════════════════════════════════════════════════════
+           LOGO FORM
+        ══════════════════════════════════════════════════════ */
+        .form-label { display:block; margin-bottom:6px; font-size:0.82rem; color:var(--text-2); font-weight:500; }
+        .form-input {
+            width:100%; padding:10px 13px; margin-bottom:12px;
+            background:rgba(255,255,255,0.04); border:1px solid var(--border-2);
+            color:var(--text); border-radius:var(--r-sm);
+            font-family:'Outfit',sans-serif; font-size:0.87rem; outline:none;
+            transition:border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            border-color:rgba(99,102,241,0.45);
+            box-shadow:0 0 0 3px rgba(99,102,241,0.07);
+        }
+        .forge-btn {
+            width:100%; padding:11px; border:none; border-radius:var(--r-md);
+            background:var(--grad-pink); color:#fff;
+            font-family:'Outfit',sans-serif; font-weight:700; font-size:0.9rem;
+            cursor:pointer; margin-top:4px; transition:all 0.22s;
+            box-shadow:0 4px 20px rgba(244,114,182,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+            position:relative; overflow:hidden;
+        }
+        .forge-btn::after {
+            content:""; position:absolute; inset:0;
+            background:linear-gradient(135deg,rgba(255,255,255,0.12),transparent);
+        }
+        .forge-btn:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(244,114,182,0.55); }
+
+        /* ══════════════════════════════════════════════════════
+           MARKDOWN OUTPUT
+        ══════════════════════════════════════════════════════ */
+        .md-output h2 {
+            font-family:'Outfit',sans-serif; font-size:0.93rem; font-weight:800;
+            color:#fff; margin:13px 0 5px;
+            padding-left:10px; border-left:3px solid var(--forge);
+        }
+        .md-output h3 { font-family:'Outfit',sans-serif; font-size:0.86rem; color:var(--text-2); margin:9px 0 3px; font-weight:700; }
+        .md-output ul { padding-left:18px; }
+        .md-output li { margin-bottom:4px; }
+        .md-output strong { color:#fff; font-weight:700; }
+        .md-output p { margin-bottom:7px; }
+        .md-output hr { border:none; border-top:1px solid var(--border); margin:10px 0; }
+
+        /* ══════════════════════════════════════════════════════
+           SCROLLBARS
+        ══════════════════════════════════════════════════════ */
+        ::-webkit-scrollbar { width:3px; height:3px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.07); border-radius:10px; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.15); }
+
+        /* ══════════════════════════════════════════════════════
+           ANIMATIONS
+        ══════════════════════════════════════════════════════ */
+        @keyframes slideUp {
+            from { opacity:0; transform:translateY(16px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+
+        /* ── Voice button ── */
+        #voice-btn {
+            flex-shrink:0; margin-bottom:2px;
+            width:36px; height:36px; border-radius:var(--r-sm);
+            background:rgba(255,255,255,0.04); border:1px solid var(--border-2);
+            color:var(--text-3); display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:all 0.22s cubic-bezier(0.22,1,0.36,1);
+        }
+        #voice-btn:hover { background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.4); color:#34d399; }
+        #voice-btn.listening {
+            background:rgba(239,68,68,0.18); border-color:rgba(239,68,68,0.5);
+            color:#f87171; animation:voicePulse 1s ease-in-out infinite;
+        }
+        @keyframes voicePulse {
+            0%,100% { box-shadow:0 0 0 0 rgba(239,68,68,0.4); }
+            50%      { box-shadow:0 0 0 6px rgba(239,68,68,0); }
+        }
+
+        /* ── Action bar extra buttons ── */
+        #compare-btn, #export-btn {
+            font-family:'Outfit',sans-serif; font-size:0.82rem; font-weight:600;
+            padding:8px 14px; border-radius:var(--r-md); cursor:pointer; transition:all 0.2s;
+        }
+        #compare-btn {
+            background:rgba(34,211,238,0.1); border:1px solid rgba(34,211,238,0.25);
+            color:var(--cyan);
+        }
+        #compare-btn:hover { background:rgba(34,211,238,0.2); border-color:rgba(34,211,238,0.5); }
+        #export-btn {
+            background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.25);
+            color:var(--gold);
+        }
+        #export-btn:hover { background:rgba(251,191,36,0.18); border-color:rgba(251,191,36,0.5); }
+
+        /* ── Empty state ── */
+        #empty-state {
+            display:none; flex-direction:column; align-items:center;
+            padding:32px 20px; text-align:center; gap:8px;
+            animation:slideUp 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        #empty-state.visible { display:flex; }
+        #empty-greeting {
+            font-family:'Outfit',sans-serif; font-size:1.4rem; font-weight:800;
+            color:var(--text); letter-spacing:-0.5px;
+        }
+        #empty-sub { font-size:0.85rem; color:var(--text-3); margin-bottom:16px; }
+        #starter-prompts { display:flex; flex-direction:column; gap:8px; width:100%; max-width:480px; }
+        .starter-chip {
+            background:rgba(255,255,255,0.03); border:1px solid var(--border-2);
+            border-radius:var(--r-md); padding:12px 18px; cursor:pointer;
+            font-size:0.88rem; color:var(--text-2); text-align:left;
+            transition:all 0.2s; display:flex; align-items:center; gap:12px;
+            font-family:'Outfit',sans-serif; font-weight:500;
+        }
+        .starter-chip:hover {
+            background:var(--indigo-glow); border-color:var(--border-glow);
+            color:var(--indigo-2); transform:translateX(4px);
+        }
+        .starter-chip .chip-icon { font-size:1.1rem; flex-shrink:0; }
+        .starter-chip .chip-text { flex:1; }
+        .starter-chip .chip-arrow { color:var(--text-3); font-size:0.8rem; flex-shrink:0; transition:transform 0.2s; }
+        .starter-chip:hover .chip-arrow { transform:translateX(3px); color:var(--indigo-2); }
+
+        /* ── Iterative refinement chip (appears after workspace tool results) ── */
+        .refine-bar {
+            display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;
+            padding-top:10px; border-top:1px solid var(--border);
+        }
+        .refine-chip {
+            background:rgba(255,255,255,0.04); border:1px solid var(--border-2);
+            border-radius:20px; padding:5px 13px; cursor:pointer;
+            font-size:0.77rem; color:var(--text-2); font-weight:600;
+            transition:all 0.18s; font-family:'Outfit',sans-serif;
+        }
+        .refine-chip:hover { background:var(--forge-glow); border-color:rgba(255,122,26,0.4); color:var(--forge); }
+
+        /* ── Auto-name suggestion banner ── */
+        #auto-name-bar {
+            display:none; align-items:center; gap:10px;
+            background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2);
+            border-radius:var(--r-md); padding:10px 14px;
+            font-size:0.84rem; color:var(--text-2);
+            animation:slideUp 0.3s ease;
+        }
+        #auto-name-bar.visible { display:flex; }
+        #auto-name-bar strong { color:var(--indigo-2); }
+        #accept-name-btn, #dismiss-name-btn {
+            border:none; border-radius:6px; padding:4px 12px;
+            font-size:0.78rem; font-weight:600; cursor:pointer;
+            font-family:'Outfit',sans-serif; transition:all 0.15s;
+        }
+        #accept-name-btn { background:var(--indigo-glow); color:var(--indigo-2); border:1px solid rgba(99,102,241,0.3); }
+        #accept-name-btn:hover { background:rgba(99,102,241,0.25); }
+        #dismiss-name-btn { background:transparent; color:var(--text-3); border:1px solid var(--border); }
+        #dismiss-name-btn:hover { color:var(--text-2); }
+
+
+        /* ══════════════════════════════════════════════════════
+           GEMINI LIVE BUTTON & MODAL
+        ══════════════════════════════════════════════════════ */
+        #live-btn {
+            display:flex; align-items:center; gap:7px;
+            font-family:'Outfit',sans-serif; font-size:0.8rem; font-weight:700;
+            padding:6px 16px; border-radius:20px; cursor:pointer; letter-spacing:0.3px;
+            background:rgba(255,255,255,0.03); border:1px solid var(--border-2);
+            color:var(--text-2); transition:all 0.25s;
+        }
+        #live-btn:hover {
+            background:rgba(239,68,68,0.12); border-color:rgba(239,68,68,0.45);
+            color:#f87171; box-shadow:0 0 20px rgba(239,68,68,0.15);
+        }
+        #live-btn.active {
+            background:rgba(239,68,68,0.18); border-color:rgba(239,68,68,0.55);
+            color:#f87171; box-shadow:0 0 24px rgba(239,68,68,0.25);
+        }
+        #live-dot {
+            width:8px; height:8px; border-radius:50%;
+            background:var(--text-3); display:inline-block; flex-shrink:0;
+            transition:all 0.3s;
+        }
+        #live-btn.active #live-dot {
+            background:#ef4444;
+            box-shadow:0 0 8px #ef4444;
+            animation:livePulse 1.2s ease-in-out infinite;
+        }
+        @keyframes livePulse {
+            0%,100% { transform:scale(1);   opacity:1; }
+            50%      { transform:scale(1.4); opacity:0.7; }
+        }
+
+        /* ── Live Modal ── */
+        #live-popup {
+            position:fixed; inset:0; z-index:99999;
+            background:rgba(0,0,0,0.85); backdrop-filter:blur(12px);
+            display:none; align-items:center; justify-content:center;
+        }
+        #live-box {
+            width:520px; max-width:94vw;
+            background:var(--surface-2); border-radius:var(--r-xl);
+            border:1px solid var(--border-2);
+            box-shadow:0 32px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(239,68,68,0.1);
+            display:flex; flex-direction:column; overflow:hidden;
+            animation:popIn 0.25s cubic-bezier(0.34,1.5,0.64,1);
+        }
+        /* Crimson top-line accent for Live */
+        #live-box::before {
+            content:""; display:block; height:2px; flex-shrink:0;
+            background:linear-gradient(90deg, transparent, #ef4444, #f97316, transparent);
+        }
+
+        #live-header {
+            padding:20px 24px 14px;
+            border-bottom:1px solid var(--border);
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        #live-header-left { display:flex; flex-direction:column; gap:3px; }
+        #live-title {
+            font-family:'Outfit',sans-serif; font-weight:900; font-size:1rem;
+            color:var(--text); letter-spacing:-0.3px;
+        }
+        #live-subtitle {
+            font-family:'DM Mono',monospace; font-size:0.65rem;
+            color:var(--text-3); letter-spacing:1px;
+        }
+        #live-close-btn {
+            background:rgba(255,255,255,0.05); border:1px solid var(--border-2);
+            color:var(--text-2); padding:5px 14px; border-radius:var(--r-sm);
+            cursor:pointer; font-family:'Outfit',sans-serif;
+            font-size:0.79rem; font-weight:600; transition:all 0.15s;
+        }
+        #live-close-btn:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+
+        /* ── Visualiser: animated waveform bars ── */
+        #live-visualiser {
+            display:flex; align-items:center; justify-content:center; gap:4px;
+            height:80px; padding:0 24px;
+        }
+        .vbar {
+            width:4px; border-radius:2px; background:var(--border-2);
+            transition:height 0.08s ease, background 0.3s;
+        }
+        #live-box.listening .vbar {
+            background:rgba(239,68,68,0.7);
+            animation:waveAnim 0.5s ease-in-out infinite alternate;
+        }
+        #live-box.speaking .vbar {
+            background:linear-gradient(180deg,#818cf8,#6366f1);
+            animation:waveAnim 0.35s ease-in-out infinite alternate;
+        }
+        @keyframes waveAnim {
+            from { height:6px;  }
+            to   { height:var(--h, 32px); }
+        }
+
+        /* ── Status label ── */
+        #live-status {
+            text-align:center; padding:0 24px 8px;
+            font-family:'DM Mono',monospace; font-size:0.72rem;
+            color:var(--text-3); letter-spacing:1px; text-transform:uppercase;
+            min-height:1.2em;
+        }
+
+        /* ── Transcript area ── */
+        #live-transcript {
+            margin:0 16px 12px; padding:14px 16px;
+            background:rgba(255,255,255,0.025); border:1px solid var(--border);
+            border-radius:var(--r-md); max-height:180px; overflow-y:auto;
+            display:flex; flex-direction:column; gap:10px;
+            font-size:0.88rem; line-height:1.55;
+        }
+        .lt-user {
+            align-self:flex-end; background:var(--grad-brand);
+            color:#fff; padding:8px 14px; border-radius:14px 14px 4px 14px;
+            max-width:82%; font-size:0.86rem;
+        }
+        .lt-gemini {
+            align-self:flex-start; background:rgba(99,102,241,0.12);
+            border:1px solid rgba(99,102,241,0.2);
+            color:var(--text); padding:8px 14px; border-radius:14px 14px 14px 4px;
+            max-width:82%; font-size:0.86rem;
+        }
+        .lt-placeholder {
+            color:var(--text-3); font-size:0.83rem; text-align:center;
+            padding:20px 0; font-family:'DM Mono',monospace; font-size:0.7rem;
+            letter-spacing:0.5px;
+        }
+
+        /* ── Controls row ── */
+        #live-controls {
+            display:flex; align-items:center; justify-content:center; gap:12px;
+            padding:14px 24px 20px;
+        }
+        #live-mic-btn {
+            width:60px; height:60px; border-radius:50%; border:none; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            transition:all 0.25s cubic-bezier(0.22,1,0.36,1);
+            position:relative;
+        }
+        #live-mic-btn.idle {
+            background:var(--grad-brand);
+            box-shadow:0 6px 24px rgba(99,102,241,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        #live-mic-btn.idle:hover { transform:scale(1.08); box-shadow:0 10px 32px rgba(99,102,241,0.6); }
+        #live-mic-btn.recording {
+            background:linear-gradient(135deg,#ef4444,#dc2626);
+            box-shadow:0 6px 24px rgba(239,68,68,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
+            animation:micPulse 1s ease-in-out infinite;
+        }
+        @keyframes micPulse {
+            0%,100% { box-shadow:0 6px 24px rgba(239,68,68,0.5),0 0 0 0 rgba(239,68,68,0.4); }
+            50%      { box-shadow:0 6px 24px rgba(239,68,68,0.6),0 0 0 12px rgba(239,68,68,0); }
+        }
+        #live-mic-btn.loading {
+            background:rgba(255,255,255,0.08); border:1px solid var(--border-2);
+            cursor:not-allowed;
+        }
+        .live-mic-icon { pointer-events:none; }
+
+        #live-end-btn {
+            padding:10px 20px; border-radius:var(--r-md); border:none; cursor:pointer;
+            background:rgba(255,255,255,0.05); border:1px solid var(--border-2);
+            color:var(--text-2); font-family:'Outfit',sans-serif;
+            font-size:0.84rem; font-weight:600; transition:all 0.2s;
+        }
+        #live-end-btn:hover { background:var(--red-glow); color:var(--red); border-color:rgba(239,68,68,0.4); }
+
+        #live-idea-info {
+            text-align:center; padding:0 24px 16px;
+            font-size:0.77rem; color:var(--text-3); font-family:'DM Mono',monospace;
+            letter-spacing:0.5px;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Ambient glow orbs — pure CSS decoration -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <button id="skip-intro">Skip Intro</button>
+
+    <!-- Intro -->
+    <div id="intro-bg"></div>
+    <div id="intro-scene">
+        <div id="flash"></div>
+        <div id="shockwave"></div>
+        <div id="glowing-point"></div>
+        <div id="particles-container"></div>
+        <h1 id="logo-text">IdeaForgr <span class="ai-text">AI</span></h1>
+        <div id="logo-accent"></div>
+        <div id="hammer-wrapper">
+            <svg viewBox="0 0 120 120" width="140" height="140" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="5" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <linearGradient id="hammer-grad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#8b5cf6"/><stop offset="100%" stop-color="#3b82f6"/>
+                    </linearGradient>
+                    <linearGradient id="handle-grad" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#0f172a"/>
+                    </linearGradient>
+                </defs>
+                <rect x="52" y="10" width="16" height="70" rx="4" fill="url(#handle-grad)"/>
+                <rect x="54" y="12" width="4" height="66" fill="#334155" opacity="0.6" rx="2"/>
+                <line x1="52" y1="30" x2="68" y2="30" stroke="#334155" stroke-width="2"/>
+                <line x1="52" y1="40" x2="68" y2="40" stroke="#334155" stroke-width="2"/>
+                <line x1="52" y1="50" x2="68" y2="50" stroke="#334155" stroke-width="2"/>
+                <path d="M25 70 L95 70 A5 5 0 0 1 100 75 L100 90 A5 5 0 0 1 95 95 L25 95 A5 5 0 0 1 20 90 L20 75 A5 5 0 0 1 25 70 Z" fill="url(#hammer-grad)"/>
+                <path d="M30 70 L90 70 L95 82 L25 82 Z" fill="#6366f1" opacity="0.5"/>
+                <circle cx="35" cy="82.5" r="3" fill="#0f172a"/>
+                <circle cx="85" cy="82.5" r="3" fill="#0f172a"/>
+                <line x1="45" y1="82.5" x2="75" y2="82.5" stroke="#93c5fd" stroke-width="2" opacity="0.6"/>
+                <rect x="35" y="95" width="50" height="8" rx="2" fill="#f97316" filter="url(#neon-glow)"/>
+                <rect x="40" y="95" width="40" height="4" fill="#fff" opacity="0.8"/>
+            </svg>
+        </div>
+    </div>
+
+    <div id="badge-container">
+        <svg id="badge-icon" viewBox="0 0 100 100" width="38" height="38">
+            <defs>
+                <linearGradient id="badge-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/>
+                </linearGradient>
+                <filter id="badge-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur"/>
+                    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+            <circle cx="50" cy="50" r="46" fill="url(#badge-grad)" stroke="#1e293b" stroke-width="4"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+            <text x="50" y="66" font-family="'Outfit', sans-serif" font-size="44" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="-2">IF</text>
+            <circle cx="80" cy="20" r="10" fill="#f97316" filter="url(#badge-glow)"/>
+        </svg>
+        <span class="badge-text">IdeaForgr AI</span>
+    </div>
+
+    <!-- Main App -->
+    <div id="app-container">
+        <div class="grid-overlay"></div>
+        <nav>
+            <div></div><!-- badge sits here via GSAP -->
+            <div class="nav-right">
+                <button id="live-btn" onclick="openLive()">
+                    <span id="live-dot"></span> Live
+                </button>
+                <button id="guide-btn" onclick="showGuide()">? Guide</button>
+                <span class="nav-chip" id="model-chip">gemini-2.5-flash-lite</span>
+                <span class="nav-chip" id="idea-count-chip">0 ideas</span>
+            </div>
+        </nav>
+
+        <main id="main-content">
+            <!-- LEFT: Chat Column -->
+            <div class="chat-column">
+                <!-- Action Bar -->
+                <div class="action-bar">
+                    <button id="create-idea" onclick="createIdea()">＋ New Idea</button>
+                    <button id="clear-data" onclick="clearData()">🗑 Clear Data</button>
+                    <button id="compare-btn" onclick="openCompare()">⚡ Compare</button>
+                    <button id="export-btn" onclick="exportIdea()">↓ Export PDF</button>
+                </div>
+
+                <!-- Auto-name suggestion bar -->
+                <div id="auto-name-bar">
+                    <span>💡 Suggested name: <strong id="suggested-name"></strong></span>
+                    <button id="accept-name-btn" onclick="acceptSuggestedName()">Use it</button>
+                    <button id="dismiss-name-btn" onclick="dismissNameSuggestion()">Dismiss</button>
+                </div>
+                <!-- Idea Tabs (Red) -->
+                <div id="ideas-tabs"></div>
+
+                <!-- Sub Tabs -->
+                <div id="subtabs-bar"></div>
+
+                <!-- Output -->
+                <div id="output-wrapper">
+                    <div id="output"></div>
+                </div>
+                <!-- Empty state — shown when a new idea has no messages yet -->
+                <div id="empty-state">
+                    <p id="empty-greeting">What are we building today?</p>
+                    <p id="empty-sub">Pick a prompt to get started, or just type below.</p>
+                    <div id="starter-prompts"></div>
+                </div>
+
+                <!-- Input -->
+                <div class="input-box">
+                    <button id="plus-btn" onclick="toggleDropdown(event)" title="Tools">＋</button>
+                    <button id="voice-btn" title="Voice input" onclick="toggleVoice()">
+                        <svg id="voice-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                    </button>
+                        </svg>
+                    </button>
+
+                    <div id="tool-dropdown" class="dropdown-menu">
+                        <!-- These items PREFILL the textarea with a mode tag so the
+                             user can add context, then hit Forge. They do NOT
+                             trigger workspace tools — they route through normal chat. -->
+                        <button onclick="prefillChat('research'); closeDropdown();" class="dropdown-item">🔬 Research Mode</button>
+                        <button onclick="prefillChat('pitch'); closeDropdown();" class="dropdown-item">🎯 Pitch Mode</button>
+                        <button onclick="prefillChat('swot'); closeDropdown();" class="dropdown-item">📊 SWOT Mode</button>
+                        <button onclick="prefillChat('names'); closeDropdown();" class="dropdown-item">💡 Name Ideas Mode</button>
+                        <div class="dropdown-separator"></div>
+                        <button onclick="generateLogo(); closeDropdown();" class="dropdown-item">✨ Generate Logo (SVG)</button>
+                    </div>
+
+                    <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
+                        <!-- Mode barcmd: shown when a dropdown prefill mode is active -->
+                        <div id="active-mode-bar">
+                            <span id="mode-tag-label" class="mode-tag">🔬 Research Mode</span>
+                            <button id="clear-mode" title="Clear mode" onclick="clearMode()">×</button>
+                        </div>
+                        <textarea id="input" placeholder="Describe your idea or ask anything about it…" rows="3"></textarea>
+                        <div class="input-footer">
+                            <span class="input-hint">Enter to send · Shift+Enter for new line</span>
+                            <button onclick="askAI()" id="ask-btn">
+                                Query
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Workspace Panel -->
+            <div id="workspace-panel">
+                <div class="workspace-header">Workspace Tools</div>
+
+                <div class="tool-grid">
+                    <button class="tool-btn research" onclick="wsResearch()">
+                        <span class="tool-icon">🔬</span> Research
+                    </button>
+                    <button class="tool-btn logo" onclick="generateLogo()">
+                        <span class="tool-icon">✨</span> Logo
+                    </button>
+                    <button class="tool-btn summary" onclick="wsSummary()">
+                        <span class="tool-icon">📝</span> Summary
+                    </button>
+                    <button class="tool-btn names" onclick="wsNames()">
+                        <span class="tool-icon">💡</span> Names
+                    </button>
+                    <button class="tool-btn pitch" onclick="wsPitch()">
+                        <span class="tool-icon">🎯</span> Pitch
+                    </button>
+                    <button class="tool-btn swot" onclick="wsSWOT()">
+                        <span class="tool-icon">📊</span> SWOT
+                    </button>
+                </div>
+
+                <!-- Inline workspace result -->
+                <div id="workspace-content">
+                    Select a tool to generate structured insights for your current idea.
+                </div>
+
+                <!-- Saved results history -->
+                <div id="saved-results"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Popup Modal -->
+    <div id="result-popup">
+        <div id="popup-box">
+            <div id="popup-header">
+                <span id="popup-title">Result</span>
+                <div class="popup-header-btns">
+                    <button id="copy-result">Copy</button>
+                    <button id="download-result">↓ Download</button>
+                    <button id="close-popup">✕ Close</button>
+                </div>
+            </div>
+            <div id="popup-content"></div>
+        </div>
+    </div>
+
+    <script>
+    // ================================================================
+    // INTRO ANIMATION
+    // ================================================================
+    document.addEventListener("DOMContentLoaded", () => {
+        const particlesContainer = document.getElementById('particles-container');
+        const skipBtn = document.getElementById('skip-intro');
+        const colors = ['#f97316','#fbbf24','#ef4444','#3b82f6','#8b5cf6','#ffffff'];
+        const shapes = ['circle','square','triangle'];
+
+        for (let i = 0; i < 80; i++) {
+            const p = document.createElement('div');
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            p.classList.add('particle', `shape-${shape}`);
+            const size = Math.random() * 10 + 4;
+            p.style.cssText = `width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]}`;
+            particlesContainer.appendChild(p);
+        }
+
+        gsap.set('#hammer-wrapper', { y:-400, rotation:15 });
+        gsap.set('#logo-text', { scale:0, opacity:0 });
+        gsap.set('#logo-accent', { scale:0, opacity:0, y:0 });
+        gsap.set('.particle', { x:0, y:0, scale:0 });
+        gsap.set('#badge-container', { top:'50%', left:'50%', xPercent:-50, yPercent:-50 });
+        gsap.set('#badge-icon', { scale:0, opacity:0 });
+        gsap.set('.badge-text', { opacity:0, x:-20 });
+
+        const tl = gsap.timeline({ delay:0.3 });
+
+        tl.to(skipBtn, { opacity:1, duration:1 }, 0.5)
+          .addLabel('strike')
+          .to('#hammer-wrapper', { y:0, rotation:0, duration:0.6, ease:'power4.in' }, 'strike')
+          .addLabel('impact','strike+=0.6')
+          .to('#flash', { opacity:1, duration:0.05 }, 'impact')
+          .to('#flash', { opacity:0, duration:0.5, ease:'power2.out' }, 'impact+=0.05')
+          .to('#shockwave', { scale:60, opacity:0, duration:0.8, ease:'power3.out' }, 'impact')
+          .to('#glowing-point', { scale:0, opacity:0, duration:0.1 }, 'impact')
+          .to('#hammer-wrapper', { y:-60, rotation:-3, duration:0.5, ease:'back.out(1.5)' }, 'impact')
+          .to('.particle', { duration:1.2, opacity:1, scale:() => Math.random()*1.5+0.5, x:() => (Math.random()-0.5)*window.innerWidth*0.9, y:() => (Math.random()-0.5)*window.innerHeight*0.9, rotation:() => Math.random()*720, ease:'expo.out' }, 'impact')
+          .addLabel('implode','impact+=1.3')
+          .to('.particle', { duration:1, x:0, y:0, scale:0, rotation:0, ease:'back.in(1.2)', stagger:{amount:0.2,from:'edges'} }, 'implode')
+          .addLabel('reveal','implode+=0.8')
+          .to('#logo-text', { scale:1, opacity:1, duration:0.8, ease:'elastic.out(1,0.7)' }, 'reveal')
+          .to('#logo-accent', { scale:1, opacity:1, y:-48, rotation:45, duration:0.8, ease:'back.out(2)' }, 'reveal')
+          .to('#hammer-wrapper', { y:-95, scale:0.65, rotation:0, duration:0.8, ease:'power3.out' }, 'reveal')
+          .addLabel('hold','reveal+=1.5')
+          .to(['#logo-text','#logo-accent','#hammer-wrapper'], { duration:0.5, scale:0, opacity:0, y:20, ease:'back.in(1.2)' }, 'hold')
+          .addLabel('badgeIn','hold+=0.4')
+          .to('#badge-icon', { duration:0.6, scale:1, opacity:1, ease:'elastic.out(1,0.6)' }, 'badgeIn')
+          .addLabel('transition','badgeIn+=0.5')
+          .to('#badge-container', { duration:1.2, top:'19px', left:'5vw', xPercent:0, yPercent:0, ease:'power3.inOut' }, 'transition')
+          .to('.badge-text', { duration:0.8, opacity:1, x:0, ease:'power2.out' }, 'transition+=0.4')
+          .to('#intro-bg', { duration:1.2, opacity:0, ease:'power2.inOut' }, 'transition')
+          .to('#app-container', { duration:1.2, opacity:1, y:0, ease:'power3.out' }, 'transition+=0.2')
+          .to(skipBtn, { opacity:0, duration:0.5, onComplete:() => skipBtn.style.display='none' }, 'transition')
+          .set(['#intro-bg','#intro-scene'], { display:'none' })
+          .set('body', { overflow:'hidden' });
+
+        skipBtn.addEventListener('click', () => { tl.progress(1); });
+
+        // Init app
+        renderIdeas();
+        renderSubTabs();
+        loadMessages();
+        updateNavChips();
+        renderAllSavedResults(); // restore persisted workspace results
+    });
+
+    // ================================================================
+    // STATE
+    // ================================================================
+    let ideas = JSON.parse(localStorage.getItem("ideas_v2")) || [{
+        name: "Idea 1",
+        tabs: { Chat:[], Research:[], Pitch:[], Notes:[] }
+    }];
+    let currentIdea = 0;
+    let currentSubTab = "Chat";
+
+    function saveIdeas() {
+        localStorage.setItem("ideas_v2", JSON.stringify(ideas));
+        updateNavChips();
+    }
+
+    function clearData() {
+        if (!confirm("Clear all saved ideas and data? This cannot be undone.")) return;
+        localStorage.clear();
+        location.reload();
+    }
+
+    function updateNavChips() {
+        document.getElementById("idea-count-chip").textContent = `${ideas.length} idea${ideas.length !== 1 ? 's' : ''}`;
+    }
+
+    // ================================================================
+    // RENDER IDEAS
+    // ================================================================
+    function renderIdeas() {
+        const container = document.getElementById("ideas-tabs");
+        container.innerHTML = "";
+
+        ideas.forEach((idea, index) => {
+            const tab = document.createElement("button");
+            tab.className = "idea-tab" + (index === currentIdea ? " active" : "");
+
+            const label = document.createElement("span");
+            label.textContent = idea.name;
+            tab.appendChild(label);
+
+            const del = document.createElement("button");
+            del.className = "del-btn";
+            del.innerHTML = "×";
+            del.title = "Delete idea";
+            del.onclick = (e) => {
+                e.stopPropagation();
+                if (!confirm(`Delete "${idea.name}"?`)) return;
+                ideas.splice(index, 1);
+                if (ideas.length === 0) createIdea();
+                else if (currentIdea >= ideas.length) currentIdea = ideas.length - 1;
+                saveIdeas(); renderIdeas(); renderSubTabs(); loadMessages();
+            };
+            tab.appendChild(del);
+
+            tab.onclick = () => {
+                currentIdea = index;
+                const keys = Object.keys(ideas[currentIdea].tabs);
+                if (!keys.includes(currentSubTab)) currentSubTab = keys[0] || "Chat";
+                renderIdeas(); renderSubTabs(); loadMessages();
+            };
+
+            tab.ondblclick = () => {
+                const n = prompt("Rename idea:", idea.name);
+                if (n && n.trim()) { ideas[index].name = n.trim(); saveIdeas(); renderIdeas(); }
+            };
+
+            container.appendChild(tab);
+        });
+    }
+
+    function createIdea() {
+        ideas.push({ name: `Idea ${ideas.length + 1}`, tabs:{ Chat:[], Research:[], Pitch:[], Notes:[] } });
+        currentIdea = ideas.length - 1;
+        currentSubTab = "Chat";
+        saveIdeas(); renderIdeas(); renderSubTabs(); loadMessages();
+    }
+
+    // ================================================================
+    // RENDER SUBTABS
+    // ================================================================
+    function renderSubTabs() {
+        const bar = document.getElementById("subtabs-bar");
+        bar.innerHTML = "";
+
+        Object.keys(ideas[currentIdea].tabs).forEach(tabName => {
+            const tab = document.createElement("button");
+            tab.className = "sub-tab" + (tabName === currentSubTab ? " active" : "");
+
+            const label = document.createElement("span");
+            label.textContent = tabName;
+            tab.appendChild(label);
+
+            const del = document.createElement("button");
+            del.className = "del-btn";
+            del.innerHTML = "×";
+            del.onclick = (e) => {
+                e.stopPropagation();
+                if (!confirm(`Delete tab "${tabName}"?`)) return;
+                delete ideas[currentIdea].tabs[tabName];
+                const rem = Object.keys(ideas[currentIdea].tabs);
+                if (rem.length === 0) { ideas[currentIdea].tabs["Chat"] = []; currentSubTab = "Chat"; }
+                else if (currentSubTab === tabName) currentSubTab = rem[0];
+                saveIdeas(); renderSubTabs(); loadMessages();
+            };
+            tab.appendChild(del);
+
+            tab.onclick = () => { currentSubTab = tabName; renderSubTabs(); loadMessages(); };
+            tab.ondblclick = () => {
+                const n = prompt("Rename tab:", tabName);
+                if (!n || !n.trim() || n.trim() === tabName) return;
+                const clean = n.trim();
+                if (ideas[currentIdea].tabs[clean]) { alert("Tab already exists."); return; }
+                const newTabs = {};
+                for (const k in ideas[currentIdea].tabs) newTabs[k === tabName ? clean : k] = ideas[currentIdea].tabs[k];
+                ideas[currentIdea].tabs = newTabs;
+                if (currentSubTab === tabName) currentSubTab = clean;
+                saveIdeas(); renderSubTabs();
+            };
+            bar.appendChild(tab);
+        });
+
+        const addBtn = document.createElement("button");
+        addBtn.className = "sub-tab add-sub-tab";
+        addBtn.textContent = "＋";
+        addBtn.title = "Add tab";
+        addBtn.onclick = () => {
+            const n = prompt("New tab name:");
+            if (!n || !n.trim()) return;
+            const clean = n.trim();
+            if (ideas[currentIdea].tabs[clean]) { alert("Tab already exists."); return; }
+            ideas[currentIdea].tabs[clean] = [];
+            currentSubTab = clean;
+            saveIdeas(); renderSubTabs(); loadMessages();
+        };
+        bar.appendChild(addBtn);
+    }
+
+    // ================================================================
+    // MESSAGES
+    // ================================================================
+    function loadMessages() {
+        const output = document.getElementById("output");
+        const wrapper = document.getElementById("output-wrapper");
+        output.innerHTML = "";
+        const messages = ideas[currentIdea]?.tabs[currentSubTab] || [];
+        if (messages.length > 0) {
+            wrapper.style.display = "block";
+            messages.forEach(msg => {
+                const div = document.createElement("div");
+                div.className = msg.className;
+                div.innerHTML = msg.content;
+                output.appendChild(div);
+            });
+            wrapper.scrollTop = wrapper.scrollHeight;
+            document.getElementById("empty-state").classList.remove("visible"); // hide if messages exist
+        } else {
+            wrapper.style.display = "none";
+            renderEmptyState();
+        }
+        dismissNameSuggestion();
+        nameSuggestionPending = false;
+    }
+
+    function saveMessage(ideaIdx, subTab, className, content) {
+        if (!ideas[ideaIdx].tabs[subTab]) ideas[ideaIdx].tabs[subTab] = [];
+        ideas[ideaIdx].tabs[subTab].push({ className, content });
+        saveIdeas();
+    }
+
+    // ================================================================
+    // CONTEXT-AWARE AI CALL
+    // This is the key upgrade: every request now tells the AI:
+    //  - the idea name & description
+    //  - which tab we're in
+    //  - the last few messages for context
+    // So the AI gives RELEVANT answers instead of generic ones.
+    // ================================================================
+    function buildContextualPrompt(userPrompt) {
+        const idea = ideas[currentIdea];
+        const recentMessages = (idea.tabs[currentSubTab] || []).slice(-6); // last 6 msgs
+        const history = recentMessages.map(m => {
+            const isUser = m.className.includes("msg-user");
+            // Strip HTML tags for the context string
+            const text = m.content.replace(/<[^>]+>/g, '');
+            return `${isUser ? 'User' : 'AI'}: ${text}`;
+        }).join('\n');
+
+        // Cross-tab context: pull snippets from every other tab
+        const crossTabContext = Object.entries(idea.tabs)
+            .filter(([tab]) => tab !== currentSubTab)
+            .map(([tab, msgs]) => {
+                const snippet = msgs.filter(m => m.className.includes("msg-ai"))
+                    .slice(-2).map(m => m.content.replace(/<[^>]+>/g,'').slice(0,300)).join(" ");
+                return snippet ? "[" + tab + " notes]: " + snippet : null;
+            }).filter(Boolean).join("\n");
+
+        return "You are IdeaForgr AI — a smart, energetic startup idea assistant. Be specific and actionable.\n\n" +
+            "IDEA NAME: \"" + idea.name + "\"\n" +
+            "CURRENT TAB: " + currentSubTab + "\n" +
+            (crossTabContext ? "\nOTHER TAB CONTEXT (use this for informed answers):\n" + crossTabContext + "\n" : "") +
+            (history ? "\nRECENT CONVERSATION:\n" + history + "\n" : "") +
+            "\nUSER REQUEST: " + userPrompt + "\n\n" +
+            "Respond helpfully. Use **bold** for key terms. Reference cross-tab context when relevant.";
+    }
+
+    async function askAI(customPrompt = null) {
+        const input = document.getElementById("input");
+        const output = document.getElementById("output");
+        const wrapper = document.getElementById("output-wrapper");
+        const btn = document.getElementById("ask-btn");
+
+        let rawPrompt = customPrompt !== null ? customPrompt : input.value.trim();
+        if (!rawPrompt) return null;
+
+        const reqIdea = currentIdea;
+        const reqSubTab = currentSubTab;
+        const contextualPrompt = buildContextualPrompt(rawPrompt);
+
+        wrapper.style.display = "block";
+
+        // Show user bubble only for direct messages (not tool calls)
+        if (customPrompt === null) {
+            const userDiv = document.createElement("div");
+            userDiv.className = "msg msg-user";
+            userDiv.textContent = rawPrompt;
+            output.appendChild(userDiv);
+            saveMessage(reqIdea, reqSubTab, "msg msg-user", rawPrompt);
+            wrapper.scrollTop = wrapper.scrollHeight;
+            input.value = "";
+            autoResizeTextarea(input);
+        }
+
+        // Typing indicator
+        const typing = document.createElement("div");
+        typing.className = "msg msg-ai";
+        typing.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div>`;
+        output.appendChild(typing);
+        wrapper.scrollTop = wrapper.scrollHeight;
+        btn.disabled = true;
+
+        try {
+            const res = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: contextualPrompt })
+            });
+
+            if (!res.ok) throw new Error("Network error");
+            const data = await res.json();
+
+            // Format: markdown-style bold, code, line breaks
+            const formatted = formatResponse(data.reply);
+
+            if (currentIdea === reqIdea && currentSubTab === reqSubTab) {
+                typing.remove();
+                const aiDiv = document.createElement("div");
+                aiDiv.className = "msg msg-ai";
+                aiDiv.innerHTML = formatted;
+                output.appendChild(aiDiv);
+                wrapper.scrollTop = wrapper.scrollHeight;
+            }
+
+            saveMessage(reqIdea, reqSubTab, "msg msg-ai", formatted);
+            if (currentIdea === reqIdea && currentSubTab === reqSubTab) btn.disabled = false;
+
+            return formatted;
+
+        } catch (e) {
+            if (currentIdea === reqIdea && currentSubTab === reqSubTab) {
+                typing.innerHTML = "⚠️ Couldn't reach server. Is it running?";
+                btn.disabled = false;
+            }
+            saveMessage(reqIdea, reqSubTab, "msg msg-ai", "⚠️ Couldn't reach server. Is it running?");
+            return null;
+        }
+    }
+
+    // Format AI response: bold, code, line breaks
+    function formatResponse(text) {
+        return text
+            .replace(/```([\s\S]*?)```/g, '<code>$1</code>')
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n\n/g, '<br><br>')
+            .replace(/\n/g, '<br>');
+    }
+
+    // Simple markdown to HTML for workspace tools
+    function mdToHtml(text) {
+        return text
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^- (.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+            .replace(/^---$/gm, '<hr>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/^(?!<[h|u|l|h])(.+)$/gm, '<p>$1</p>')
+            .replace(/<p><\/p>/g, '');
+    }
+
+    // ================================================================
+    // KEYBOARD: Enter sends, Shift+Enter = newline
+    // ================================================================
+    document.getElementById("input").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            askAI();
+        }
+    });
+
+    document.getElementById("input").addEventListener("input", function() {
+        autoResizeTextarea(this);
+    });
+
+    function autoResizeTextarea(el) {
+        el.style.height = "auto";
+        el.style.height = Math.min(el.scrollHeight, 180) + "px";
+    }
+
+    // ================================================================
+    // WORKSPACE TOOLS — all context-aware with inline results
+    // ================================================================
+
+    function setWorkspaceLoading(label) {
+        const wc = document.getElementById("workspace-content");
+        wc.className = "";
+        wc.innerHTML = `<div style="display:flex;align-items:center;gap:10px;color:var(--muted)"><div class="ws-spinner"></div> ${label}…</div>`;
+    }
+
+    function setWorkspaceResult(html, saveTitle) {
+        if (saveTitle) {
+            showPopup(saveTitle, html);
+            setTimeout(() => showRefinementChips(saveTitle, html), 50);
+        }
+
+        // ── Reset the inline panel back to its placeholder text.
+        //    This means the panel NEVER accumulates residue — it is
+        //    always either "loading", the placeholder, or nothing. ──
+        const wc = document.getElementById("workspace-content");
+        wc.className = "";
+        wc.textContent = "Result opened in popup. Check your saved results below.";
+
+        // ── Remove the "View Full" button if it was left from a prior run ──
+        const oldBtn = document.getElementById("ws-view-btn");
+        if (oldBtn) oldBtn.remove();
+
+        // ── Save to the history list in the panel ──
+        if (saveTitle) saveWorkspaceResult(saveTitle, html);
+    }
+
+    async function wsResearch() {
+        setWorkspaceLoading("Researching");
+        const idea = ideas[currentIdea];
+        const prompt = `You are a startup research analyst. For the idea "${idea.name}", provide a structured research report with these sections:
+## Market Overview
+## Key Competitors
+## Target Audience
+## Opportunities & Gaps
+## Potential Risks
+Be specific and data-driven. Use bullet points within each section.`;
+        const result = await fetchWorkspaceTool(prompt);
+        if (result) setWorkspaceResult(mdToHtml(result), "Research");
+    }
+
+    async function wsSummary() {
+        setWorkspaceLoading("Summarizing");
+        const idea = ideas[currentIdea];
+        const chatContext = (idea.tabs["Chat"] || []).slice(-10).map(m => m.content.replace(/<[^>]+>/g,'')).join('\n');
+        const prompt = `Based on the idea "${idea.name}" and this context:\n${chatContext || "(No chat history yet)"}\n\nWrite a compelling startup summary with:
+## One-Line Pitch
+## Problem Being Solved
+## Solution
+## Unique Value Proposition
+## Who It's For
+Keep it punchy and investor-ready.`;
+        const result = await fetchWorkspaceTool(prompt);
+        if (result) setWorkspaceResult(mdToHtml(result), "Summary");
+    }
+
+    async function wsNames() {
+        setWorkspaceLoading("Generating names");
+        const idea = ideas[currentIdea];
+        const prompt = `Generate 10 creative, brandable startup names for the idea "${idea.name}". For each name provide:
+- The name (bold)
+- A one-line reason why it works
+- Domain availability hint (.com, .io etc)
+
+Make the names diverse: some short, some descriptive, some abstract, some punny. No generic names.`;
+        const result = await fetchWorkspaceTool(prompt);
+        if (result) setWorkspaceResult(mdToHtml(result), "Names");
+    }
+
+    async function wsPitch() {
+        setWorkspaceLoading("Crafting pitch");
+        const idea = ideas[currentIdea];
+        const prompt = `Write a 60-second investor elevator pitch for "${idea.name}". Structure it as:
+## Hook (1 sentence — grab attention)
+## Problem
+## Solution
+## Why Now
+## Ask / CTA
+Make it energetic, confident, and memorable. Use bold for key phrases.`;
+        const result = await fetchWorkspaceTool(prompt);
+        if (result) setWorkspaceResult(mdToHtml(result), "Pitch");
+    }
+
+    async function wsSWOT() {
+        setWorkspaceLoading("Analyzing");
+        const idea = ideas[currentIdea];
+        const prompt = `Do a thorough SWOT analysis for the startup idea "${idea.name}":
+## Strengths
+## Weaknesses
+## Opportunities
+## Threats
+Be honest, specific, and actionable. Use bullet points.`;
+        const result = await fetchWorkspaceTool(prompt);
+        if (result) setWorkspaceResult(mdToHtml(result), "SWOT");
+    }
+
+    // Raw fetch for workspace tools (no chat history injection needed — prompt is self-contained)
+    async function fetchWorkspaceTool(prompt) {
+        try {
+            const res = await fetch("/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt })
+            });
+            if (!res.ok) throw new Error("error");
+            const data = await res.json();
+            return data.reply;
+        } catch {
+            setWorkspaceResult("<span style='color:#ef4444'>⚠️ Failed. Is the server running?</span>", null);
+            return null;
+        }
+    }
+
+    // ── Dropdown prefill: stamps a mode into the textarea so the user
+    //    can add context and then hit Forge. Routes through normal chat,
+    //    NOT the workspace tool system. ──
+    const MODE_LABELS = {
+        research: "🔬 Research Mode",
+        pitch:    "🎯 Pitch Mode",
+        swot:     "📊 SWOT Mode",
+        names:    "💡 Name Ideas Mode"
+    };
+    const MODE_PROMPTS = {
+        research: "Research this idea deeply — cover the market size, key competitors, target audience, and main opportunities: ",
+        pitch:    "Write an investor-ready elevator pitch for this idea: ",
+        swot:     "Do a full SWOT analysis (Strengths, Weaknesses, Opportunities, Threats) for this idea: ",
+        names:    "Generate 10 creative, brandable startup names for this idea: "
+    };
+    let activeMode = null;
+
+    function prefillChat(mode) {
+        activeMode = mode;
+        const bar = document.getElementById("active-mode-bar");
+        const label = document.getElementById("mode-tag-label");
+        label.textContent = MODE_LABELS[mode];
+        bar.classList.add("visible");
+
+        // Pre-fill the textarea with the mode prompt so the user
+        // can see it and append their own context
+        const ta = document.getElementById("input");
+        ta.value = MODE_PROMPTS[mode];
+        ta.focus();
+        // Put cursor at the end so user types right after
+        ta.setSelectionRange(ta.value.length, ta.value.length);
+        autoResizeTextarea(ta);
+    }
+
+    function clearMode() {
+        activeMode = null;
+        document.getElementById("active-mode-bar").classList.remove("visible");
+        const ta = document.getElementById("input");
+        // Only clear if the textarea still has the prefilled prompt
+        const values = Object.values(MODE_PROMPTS);
+        if (values.some(v => ta.value === v)) ta.value = "";
+    }
+
+    // ================================================================
+    // SAVED RESULTS
+    // ================================================================
+    let lastResult = "";
+
+    // ── Saved results are stored as an array in localStorage under "saved_results_v1".
+    //    Each entry is { title, html, time }. We persist on every save/delete,
+    //    and restore the full list on page load. ──
+
+    function getSavedResults() {
+        try { return JSON.parse(localStorage.getItem("saved_results_v1")) || []; }
+        catch { return []; }
+    }
+
+    function persistSavedResults(arr) {
+        try { localStorage.setItem("saved_results_v1", JSON.stringify(arr)); }
+        catch(e) { console.warn("localStorage save failed:", e); }
+    }
+
+    // Renders one saved entry into the DOM. `idx` is its position in the array.
+    function renderSavedEntry(entry, idx, arr) {
+        const container = document.getElementById("saved-results");
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "saved-entry";
+        wrapper.dataset.idx = idx;
+
+        const btn = document.createElement("button");
+        btn.className = "saved-btn";
+        btn.innerHTML = `<span class="saved-title">${entry.title}</span><span class="saved-label">${entry.time}</span>`;
+        btn.onclick = () => showPopup(entry.title, entry.html);
+
+        const del = document.createElement("button");
+        del.className = "saved-del";
+        del.innerHTML = "×";
+        del.title = "Delete";
+        del.onclick = (e) => {
+            e.stopPropagation();
+            // Remove from storage and re-render the whole list
+            const updated = getSavedResults().filter((_, i) => i !== parseInt(wrapper.dataset.idx));
+            persistSavedResults(updated);
+            renderAllSavedResults();
+        };
+
+        wrapper.appendChild(btn);
+        wrapper.appendChild(del);
+        container.appendChild(wrapper);
+    }
+
+    // Wipes the DOM list and re-renders from localStorage (newest first)
+    function renderAllSavedResults() {
+        const container = document.getElementById("saved-results");
+        container.innerHTML = "";
+        const arr = getSavedResults(); // oldest-first in storage
+        // Show newest first: iterate in reverse
+        for (let i = arr.length - 1; i >= 0; i--) {
+            renderSavedEntry(arr[i], i, arr);
+        }
+    }
+
+    function saveWorkspaceResult(title, html) {
+        // Append to the end of the storage array (oldest→newest)
+        const arr = getSavedResults();
+        arr.push({
+            title,
+            html,
+            time: new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+        });
+        persistSavedResults(arr);
+        // Re-render so the new item appears at the top
+        renderAllSavedResults();
+    }
+
+    // ================================================================
+    // POPUP
+    // ================================================================
+    function showPopup(title, html) {
+        lastResult = html;
+        document.getElementById("popup-title").textContent = title;
+        document.getElementById("popup-content").innerHTML = html;
+        document.getElementById("result-popup").style.display = "flex";
+    }
+
+    document.getElementById("close-popup").onclick = () => {
+        document.getElementById("result-popup").style.display = "none";
+    };
+    document.getElementById("result-popup").onclick = (e) => {
+        if (e.target === document.getElementById("result-popup"))
+            document.getElementById("result-popup").style.display = "none";
+    };
+
+    document.getElementById("copy-result").onclick = () => {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = lastResult;
+        navigator.clipboard.writeText(tempDiv.textContent || "");
+        document.getElementById("copy-result").textContent = "Copied!";
+        setTimeout(() => document.getElementById("copy-result").textContent = "Copy", 1800);
+    };
+
+    // ── Download workspace result as a .txt file ──
+    // We strip HTML tags, giving clean plain text the user can paste anywhere.
+    document.getElementById("download-result").onclick = () => {
+        const title = document.getElementById("popup-title").textContent || "result";
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = lastResult;
+        const text = tempDiv.textContent || "";
+        const blob = new Blob([
+            "IdeaForgr AI — " + title + "\n" +
+            "Idea: " + (ideas[currentIdea]?.name || "") + "\n" +
+            new Date().toLocaleString() + "\n" +
+            "─────────────────────────────────────\n\n" +
+            text
+        ], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = title.replace(/\s+/g, "-") + "-IdeaForgr.txt";
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // ── Download function for the compare panel ──
+    function downloadCompareResult() {
+        const title = window._lastCompareTitle || "comparison";
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = window._lastCompareHtml || "";
+        const text = tempDiv.textContent || "";
+        const blob = new Blob([
+            "IdeaForgr AI — Comparison\n" +
+            title + "\n" +
+            new Date().toLocaleString() + "\n" +
+            "─────────────────────────────────────\n\n" +
+            text
+        ], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = title.replace(/\s+/g, "-") + "-IdeaForgr.txt";
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ================================================================
+    // SVG LOGO GENERATOR (no billing needed — generates in browser)
+    // ================================================================
+    function generateLogo() {
+        const formHtml = `
+            <div style="padding:8px;">
+                <h2 style="font-family:'Outfit',sans-serif;margin-bottom:6px;">✨ AI Logo Generator</h2>
+                <p style="color:var(--muted);margin-bottom:20px;font-size:0.9rem;">We'll generate a clean SVG logo for your idea — no API billing needed.</p>
+                <label class="form-label">Primary Color</label>
+                <input type="color" id="logo-color" value="#6366f1" style="width:100%;height:44px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;margin-bottom:14px;">
+                <label class="form-label">Logo Style</label>
+                <select id="logo-style" class="form-input" style="margin-bottom:14px;">
+                    <option value="minimal">Minimal / Lettermark</option>
+                    <option value="badge">Badge / Shield</option>
+                    <option value="geometric">Geometric Abstract</option>
+                    <option value="tech">Tech / Circuit</option>
+                    <option value="wordmark">Wordmark (Full Name)</option>
+                    <option value="neon">Neon Glow</option>
+                    <option value="monogram">Monogram (Stacked)</option>
+                    <option value="split">Split Color</option>
+                </select>
+                <label class="form-label">Tagline (optional)</label>
+                <input type="text" id="logo-tagline" class="form-input" placeholder="e.g. Forge your future">
+                <button class="forge-btn" onclick="executeLogoGeneration()">⚒ Forge Logo</button>
+            </div>
+        `;
+        showPopup("Logo Generator", formHtml);
+    }
+
+    function executeLogoGeneration() {
+        const color = document.getElementById("logo-color").value;
+        const style = document.getElementById("logo-style").value;
+        const tagline = document.getElementById("logo-tagline").value.trim();
+        const ideaName = ideas[currentIdea].name;
+
+        // Get initials (up to 2 chars)
+        const words = ideaName.trim().split(/\s+/);
+        const initials = words.length >= 2
+            ? (words[0][0] + words[1][0]).toUpperCase()
+            : ideaName.slice(0, 2).toUpperCase();
+
+        // Derive a second color (complementary shade)
+        const hex2 = shiftHue(color, 40);
+
+        let svg = "";
+
+        if (style === "minimal") {
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${hex2}"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="90" fill="url(#g1)" opacity="0.12"/>
+  <circle cx="100" cy="100" r="72" fill="none" stroke="url(#g1)" stroke-width="3"/>
+  <text x="100" y="118" font-family="'Outfit', sans-serif" font-size="58" font-weight="800" fill="${color}" text-anchor="middle" letter-spacing="-2">${initials}</text>
+  ${tagline ? `<text x="100" y="168" font-family="'Inter', sans-serif" font-size="13" fill="${color}" text-anchor="middle" opacity="0.7">${tagline}</text>` : ''}
+</svg>`;
+        } else if (style === "badge") {
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="220" viewBox="0 0 200 220">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${hex2}"/>
+    </linearGradient>
+  </defs>
+  <path d="M100 10 L185 55 L185 145 L100 200 L15 145 L15 55 Z" fill="url(#g1)"/>
+  <path d="M100 22 L175 63 L175 142 L100 190 L25 142 L25 63 Z" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <text x="100" y="118" font-family="'Outfit', sans-serif" font-size="52" font-weight="800" fill="#fff" text-anchor="middle">${initials}</text>
+  ${tagline ? `<text x="100" y="212" font-family="'Inter', sans-serif" font-size="11" fill="${color}" text-anchor="middle">${tagline}</text>` : ''}
+</svg>`;
+        } else if (style === "geometric") {
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${hex2}"/>
+    </linearGradient>
+  </defs>
+  <rect x="30" y="30" width="140" height="140" rx="24" fill="url(#g1)" opacity="0.15"/>
+  <rect x="30" y="30" width="140" height="140" rx="24" fill="none" stroke="${color}" stroke-width="2.5"/>
+  <polygon points="100,40 160,80 160,130 100,170 40,130 40,80" fill="${color}" opacity="0.18"/>
+  <text x="100" y="118" font-family="'Outfit', sans-serif" font-size="52" font-weight="800" fill="${color}" text-anchor="middle">${initials}</text>
+  ${tagline ? `<text x="100" y="188" font-family="'Inter', sans-serif" font-size="12" fill="${color}" text-anchor="middle" opacity="0.8">${tagline}</text>` : ''}
+</svg>`;
+        } else if (style === "wordmark" || style === "neon" || style === "monogram" || style === "split") {
+            svg = buildLogoSVG(style, color, hex2, initials, ideaName, tagline);
+        } else if (style === "wordmark" || style === "neon" || style === "monogram" || style === "split") {
+            svg = buildLogoSVG(style, color, hex2, initials, ideaName, tagline);
+        } else if (style === "wordmark" || style === "neon" || style === "monogram" || style === "split") {
+            svg = buildLogoSVG(style, color, hex2, initials, ideaName, tagline);
+        } else { // tech
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${hex2}"/>
+    </linearGradient>
+  </defs>
+  <rect x="20" y="20" width="160" height="160" rx="8" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.4"/>
+  <rect x="10" y="10" width="160" height="160" rx="8" fill="none" stroke="${color}" stroke-width="1" opacity="0.2"/>
+  <!-- circuit lines -->
+  <line x1="20" y1="70" x2="55" y2="70" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+  <line x1="55" y1="70" x2="55" y2="55" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+  <line x1="145" y1="130" x2="180" y2="130" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+  <line x1="145" y1="130" x2="145" y2="145" stroke="${color}" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="55" cy="55" r="4" fill="${color}" opacity="0.7"/>
+  <circle cx="145" cy="145" r="4" fill="${color}" opacity="0.7"/>
+  <text x="100" y="118" font-family="'Outfit', sans-serif" font-size="52" font-weight="800" fill="url(#g1)" text-anchor="middle">${initials}</text>
+  ${tagline ? `<text x="100" y="185" font-family="'Inter', sans-serif" font-size="11" fill="${color}" text-anchor="middle" opacity="0.7" letter-spacing="1">${tagline.toUpperCase()}</text>` : ''}
+</svg>`;
+        }
+
+        const resultHtml = `
+            <div style="text-align:center;">
+                <div style="display:inline-block;background:rgba(255,255,255,0.04);border-radius:16px;padding:30px;border:1px solid var(--border);margin-bottom:16px;">
+                    ${svg}
+                </div>
+                <p style="font-size:0.82rem;color:var(--muted);margin-bottom:12px;">Right-click the logo → "Save Image" to download</p>
+                <details style="text-align:left;">
+                    <summary style="cursor:pointer;font-size:0.83rem;color:var(--muted);margin-bottom:8px;">View SVG code</summary>
+                    <textarea readonly style="width:100%;height:120px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:monospace;font-size:0.78rem;padding:10px;">${svg.replace(/</g,'&lt;')}</textarea>
+                </details>
+            </div>
+        `;
+
+        showPopup("Generated Logo", resultHtml);
+        saveWorkspaceResult("Logo", resultHtml);
+    }
+
+    // ── New logo styles: wordmark, neon, monogram, split ──
+    function buildLogoSVG(style, color, hex2, initials, fullName, tagline) {
+        // (already handled inline for original 4 styles — this handles the new ones)
+        if (style === "wordmark") {
+            // Full business name rendered large, with a decorative underline bar
+            const nameLine = fullName.length > 12 ? fullName.slice(0,12) + "…" : fullName;
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="280" height="110" viewBox="0 0 280 110">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${hex2}"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="72" width="280" height="3" rx="2" fill="url(#g1)" opacity="0.5"/>
+  <text x="140" y="62" font-family="'Outfit', sans-serif" font-size="42" font-weight="900" fill="url(#g1)" text-anchor="middle" letter-spacing="-1">${nameLine}</text>
+  ${tagline ? `<text x="140" y="95" font-family="'Inter', sans-serif" font-size="13" fill="${color}" text-anchor="middle" opacity="0.65" letter-spacing="2">${tagline.toUpperCase()}</text>` : ''}
+</svg>`;
+        } else if (style === "neon") {
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <filter id="neon" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="neon2" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="200" height="200" fill="#06060e" rx="16"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="${color}" stroke-width="2" opacity="0.3" filter="url(#neon2)"/>
+  <circle cx="100" cy="100" r="70" fill="none" stroke="${color}" stroke-width="1" opacity="0.7"/>
+  <text x="100" y="118" font-family="'Outfit', sans-serif" font-size="62" font-weight="900" fill="${color}" text-anchor="middle" filter="url(#neon)">${initials}</text>
+  ${tagline ? `<text x="100" y="188" font-family="'Inter', sans-serif" font-size="11" fill="${color}" text-anchor="middle" opacity="0.7" letter-spacing="2" filter="url(#neon2)">${tagline.toUpperCase()}</text>` : ''}
+</svg>`;
+        } else if (style === "monogram") {
+            // Two letters stacked, different sizes/colors
+            const l1 = initials[0] || "I";
+            const l2 = initials[1] || "";
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${hex2}"/>
+    </linearGradient>
+  </defs>
+  <rect x="20" y="20" width="160" height="160" rx="20" fill="url(#g1)" opacity="0.1"/>
+  <rect x="20" y="20" width="160" height="160" rx="20" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.3"/>
+  <text x="68" y="112" font-family="'Outfit', sans-serif" font-size="90" font-weight="900" fill="${color}" text-anchor="middle" opacity="1">${l1}</text>
+  ${l2 ? `<text x="140" y="150" font-family="'Outfit', sans-serif" font-size="52" font-weight="900" fill="${hex2}" text-anchor="middle" opacity="0.85">${l2}</text>` : ''}
+  ${tagline ? `<text x="100" y="188" font-family="'Inter', sans-serif" font-size="11" fill="${color}" text-anchor="middle" opacity="0.65">${tagline}</text>` : ''}
+</svg>`;
+        } else if (style === "split") {
+            // Left half one color, right half another — split diagonally
+            return `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <clipPath id="left-clip"><polygon points="0,0 120,0 80,200 0,200"/></clipPath>
+    <clipPath id="right-clip"><polygon points="120,0 200,0 200,200 80,200"/></clipPath>
+  </defs>
+  <rect width="200" height="200" rx="18" fill="${color}" opacity="0.12"/>
+  <rect width="200" height="200" rx="18" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.3"/>
+  <!-- left letter in primary color -->
+  <text x="100" y="124" font-family="'Outfit', sans-serif" font-size="96" font-weight="900" fill="${color}" text-anchor="middle" clip-path="url(#left-clip)">${initials}</text>
+  <!-- right letter in secondary color -->
+  <text x="100" y="124" font-family="'Outfit', sans-serif" font-size="96" font-weight="900" fill="${hex2}" text-anchor="middle" clip-path="url(#right-clip)">${initials}</text>
+  ${tagline ? `<text x="100" y="186" font-family="'Inter', sans-serif" font-size="11" fill="${color}" text-anchor="middle" opacity="0.7">${tagline}</text>` : ''}
+</svg>`;
+        }
+        return "";
+    }
+
+    function showGuide() {
+        document.getElementById("guide-popup").style.display = "flex";
+    }
+
+    // Shift a hex color's hue by degrees (for complementary color)
+    function shiftHue(hex, degrees) {
+        const r = parseInt(hex.slice(1,3),16)/255;
+        const g = parseInt(hex.slice(3,5),16)/255;
+        const b = parseInt(hex.slice(5,7),16)/255;
+        const max = Math.max(r,g,b), min = Math.min(r,g,b);
+        let h, s, l = (max+min)/2;
+        if (max === min) { h = s = 0; }
+        else {
+            const d = max - min;
+            s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+            switch(max) {
+                case r: h = ((g-b)/d + (g<b?6:0))/6; break;
+                case g: h = ((b-r)/d + 2)/6; break;
+                case b: h = ((r-g)/d + 4)/6; break;
+            }
+        }
+        h = (h + degrees/360) % 1;
+        // hsl back to rgb
+        const hue2rgb = (p,q,t) => { if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p; };
+        const q = l < 0.5 ? l*(1+s) : l+s-l*s;
+        const p = 2*l-q;
+        const nr = Math.round(hue2rgb(p,q,h+1/3)*255);
+        const ng = Math.round(hue2rgb(p,q,h)*255);
+        const nb = Math.round(hue2rgb(p,q,h-1/3)*255);
+        return `#${nr.toString(16).padStart(2,'0')}${ng.toString(16).padStart(2,'0')}${nb.toString(16).padStart(2,'0')}`;
+    }
+
+
+    // ================================================================
+    // EMPTY STATE — starter prompts shown on new / empty ideas
+    // ================================================================
+    const STARTER_PROMPTS = [
+        { icon:"🎯", text:"What problem does this idea solve, and who has it?" },
+        { icon:"💰", text:"How does this idea make money? Walk me through the business model." },
+        { icon:"🏆", text:"Who are the top 3 competitors and what is my unfair advantage?" },
+        { icon:"👤", text:"Describe the ideal first customer for this idea in detail." },
+        { icon:"🚀", text:"What is the fastest MVP I could ship in 2 weeks?" },
+    ];
+
+    function renderEmptyState() {
+        const wrapper = document.getElementById("output-wrapper");
+        const empty   = document.getElementById("empty-state");
+
+        // Count ALL messages across ALL tabs for this idea —
+        // if the idea has ever had ANY message, never show empty state again.
+        const totalMsgs = Object.values(ideas[currentIdea]?.tabs || {}).flat().length;
+        const seenBefore = ideas[currentIdea]?.seenEmptyState === true;
+
+        if (totalMsgs > 0 || seenBefore) {
+            // Idea has content — hide empty state permanently for this idea
+            empty.classList.remove("visible");
+            if (totalMsgs > 0) wrapper.style.display = "block";
+            return;
+        }
+
+        // Brand new idea with zero messages — show the empty state
+        wrapper.style.display = "none";
+        empty.classList.add("visible");
+
+        const ideaName = ideas[currentIdea]?.name || "your idea";
+        document.getElementById("empty-greeting").textContent =
+            ideaName.match(/^Idea \d+$/)
+                ? "What are we building today?"
+                : "Let's forge \"" + ideaName + "\"";
+
+        const container = document.getElementById("starter-prompts");
+        container.innerHTML = "";
+        STARTER_PROMPTS.forEach(p => {
+            const chip = document.createElement("button");
+            chip.className = "starter-chip";
+            chip.innerHTML = '<span class="chip-icon">' + p.icon + '</span>' +
+                             '<span class="chip-text">' + p.text + '</span>' +
+                             '<span class="chip-arrow">→</span>';
+            chip.onclick = () => {
+                document.getElementById("empty-state").classList.remove("visible");
+                const ta = document.getElementById("input");
+                ta.value = p.text;
+                autoResizeTextarea(ta);
+                askAI();
+            };
+            container.appendChild(chip);
+        });
+    }
+
+    // ================================================================
+    // AUTO-NAMING — suggest a name after the first message
+    // ================================================================
+    let nameSuggestionPending = false;
+    let suggestedNameValue    = "";
+
+    async function tryAutoName(firstMessage) {
+        const idea = ideas[currentIdea];
+        const isDefaultName = /^Idea \d+$/.test(idea.name);
+        const msgCount = Object.values(idea.tabs).flat().length;
+        if (!isDefaultName || msgCount > 2 || nameSuggestionPending) return;
+        nameSuggestionPending = true;
+        try {
+            const res = await fetch("/ask", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body: JSON.stringify({ prompt:
+                    "Based on this startup idea description, suggest ONE creative 2-3 word startup name. " +
+                    "Reply with ONLY the name, nothing else, no punctuation, no quotes.\n\n" +
+                    "Description: " + firstMessage })
+            });
+            const data = await res.json();
+            const name = (data.reply || "").trim().replace(/["']/g,"").slice(0, 32);
+            if (name && name.split(" ").length <= 4) {
+                suggestedNameValue = name;
+                document.getElementById("suggested-name").textContent = name;
+                document.getElementById("auto-name-bar").classList.add("visible");
+            }
+        } catch(e) { /* non-critical */ }
+    }
+
+    function acceptSuggestedName() {
+        if (!suggestedNameValue) return;
+        ideas[currentIdea].name = suggestedNameValue;
+        saveIdeas(); renderIdeas();
+        dismissNameSuggestion();
+        renderEmptyState();
+    }
+
+    function dismissNameSuggestion() {
+        document.getElementById("auto-name-bar").classList.remove("visible");
+        nameSuggestionPending = false;
+        suggestedNameValue    = "";
+    }
+
+    // ================================================================
+    // ITERATIVE REFINEMENT — chips shown inside popup after tool runs
+    // ================================================================
+    const REFINE_OPTIONS = {
+        "Research": ["Dig deeper into competitors","Focus on market size data","Find monetization angles"],
+        "Summary":  ["Make it more investor-friendly","Shorten to one paragraph","Add a hook sentence"],
+        "Pitch":    ["Make it punchier","Add specific numbers","Rewrite the hook"],
+        "Names":    ["More creative unusual names","More professional names","Domain-friendly names only"],
+        "SWOT":     ["Expand on Weaknesses","Expand on Opportunities","Add mitigation strategies"],
+    };
+
+    function showRefinementChips(saveTitle, fullHtml) {
+        const opts = REFINE_OPTIONS[saveTitle];
+        if (!opts) return;
+        const popupContent = document.getElementById("popup-content");
+        const bar = document.createElement("div");
+        bar.className = "refine-bar";
+        const label = document.createElement("span");
+        label.style.cssText = "font-size:0.75rem;color:var(--text-3);font-family:'DM Mono',monospace;letter-spacing:0.5px;align-self:center;";
+        label.textContent = "REFINE →";
+        bar.appendChild(label);
+        opts.forEach(opt => {
+            const chip = document.createElement("button");
+            chip.className = "refine-chip";
+            chip.textContent = opt;
+            chip.onclick = async () => {
+                document.getElementById("result-popup").style.display = "none";
+                setWorkspaceLoading("Refining: " + opt);
+                const idea = ideas[currentIdea];
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = fullHtml;
+                const prevText = tempDiv.textContent.slice(0, 1200);
+                const prompt =
+                    "You previously generated this " + saveTitle + " for the startup idea \"" + idea.name + "\":\n\n" +
+                    prevText + "\n\n" +
+                    "Now " + opt.toLowerCase() + ". Keep the same structured format with ## headings. Be specific and actionable.";
+                const result = await fetchWorkspaceTool(prompt);
+                if (result) setWorkspaceResult(mdToHtml(result), saveTitle);
+            };
+            bar.appendChild(chip);
+        });
+        popupContent.appendChild(bar);
+    }
+
+    // ================================================================
+    // VOICE INPUT — Web Speech API (Chrome built-in, zero install)
+    // ================================================================
+    let recognition = null;
+    let isListening = false;
+
+    function toggleVoice() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Voice input requires Chrome or Edge. Please switch browsers.");
+            return;
+        }
+        if (isListening) { recognition.stop(); return; }
+
+        recognition = new SpeechRecognition();
+        recognition.continuous     = false;
+        recognition.interimResults = true;
+        recognition.lang           = "en-US";
+
+        const btn = document.getElementById("voice-btn");
+        const ta  = document.getElementById("input");
+        const originalValue = ta.value;
+
+        recognition.onstart = () => {
+            isListening = true;
+            btn.classList.add("listening");
+            ta.placeholder = "Listening... speak now";
+        };
+        recognition.onresult = (event) => {
+            let interim = "", final = "";
+            for (let r of event.results) {
+                if (r.isFinal) final += r[0].transcript;
+                else interim += r[0].transcript;
+            }
+            ta.value = originalValue + (final || interim);
+            autoResizeTextarea(ta);
+        };
+        recognition.onend = () => {
+            isListening = false;
+            btn.classList.remove("listening");
+            ta.placeholder = "Describe your idea or ask anything about it\u2026";
+            if (ta.value.trim() && ta.value !== originalValue) {
+                setTimeout(() => askAI(), 300);
+            }
+        };
+        recognition.onerror = (e) => {
+            isListening = false;
+            btn.classList.remove("listening");
+            ta.placeholder = "Describe your idea or ask anything about it\u2026";
+        };
+        recognition.start();
+    }
+
+    // ================================================================
+    // CROSS-IDEA COMPARISON
+    // ================================================================
+    function openCompare() {
+        if (ideas.length < 2) {
+            alert("You need at least 2 ideas to compare. Create another idea first!");
+            return;
+        }
+        ["compare-idea-a", "compare-idea-b"].forEach((id, offset) => {
+            const sel = document.getElementById(id);
+            sel.innerHTML = "";
+            ideas.forEach((idea, idx) => {
+                const opt = document.createElement("option");
+                opt.value = idx;
+                opt.textContent = idea.name;
+                if (idx === (offset === 0 ? 0 : Math.min(1, ideas.length-1))) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        });
+        document.getElementById("compare-result").innerHTML =
+            '<div style="color:var(--text-3);font-size:0.85rem;grid-column:1/-1;text-align:center;padding:40px 0;">Select two ideas and click Compare.</div>';
+        document.getElementById("compare-popup").style.display = "flex";
+    }
+
+    async function runCompare() {
+        const idxA = parseInt(document.getElementById("compare-idea-a").value);
+        const idxB = parseInt(document.getElementById("compare-idea-b").value);
+        if (idxA === idxB) { alert("Please select two different ideas."); return; }
+
+        const ideaA  = ideas[idxA];
+        const ideaB  = ideas[idxB];
+        const result = document.getElementById("compare-result");
+
+        result.innerHTML = '<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;padding:60px 0;color:var(--text-3);"><div class="ws-spinner"></div> Comparing with AI\u2026</div>';
+
+        function getIdeaContext(idea) {
+            return Object.entries(idea.tabs).map(([tab, msgs]) => {
+                const text = msgs.map(m => m.content.replace(/<[^>]+>/g,'')).join(" ").slice(0, 600);
+                return text ? "[" + tab + "]: " + text : null;
+            }).filter(Boolean).join("\n");
+        }
+
+        const prompt =
+            "You are a startup analyst. Compare these two startup ideas objectively.\n\n" +
+            "IDEA A — \"" + ideaA.name + "\":\n" + (getIdeaContext(ideaA) || "No notes yet.") + "\n\n" +
+            "IDEA B — \"" + ideaB.name + "\":\n" + (getIdeaContext(ideaB) || "No notes yet.") + "\n\n" +
+            "For EACH idea separately provide:\n" +
+            "## Market Potential\n## Competitive Advantage\n## Key Risks\n## Score /10\n\n" +
+            "Then add a ## Final Verdict stating which is stronger and exactly why.\n" +
+            "Be direct and specific.";
+
+        try {
+            const res = await fetch("/ask-grounded", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body: JSON.stringify({ prompt })
+            });
+            const data = await res.json();
+            const reply = data.reply || "Could not generate comparison.";
+
+            // We render the full reply as one document — no splitting needed.
+
+            // Render the full AI reply in one unified panel.
+            // The AI already structures it as Idea A → Idea B → Final Verdict
+            // using ## headings, so we just render it cleanly instead of
+            // trying to split a single continuous response into two columns.
+            const fullHtml = mdToHtml(reply);
+
+            result.innerHTML =
+                '<div style="grid-column:1/-1;background:var(--surface-3);border-radius:16px;' +
+                'padding:24px 28px;border:1px solid var(--border-2);">' +
+                    // Header badge row showing both idea names
+                    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;' +
+                    'padding-bottom:16px;border-bottom:1px solid var(--border);">' +
+                        '<span style="font-family:\'Outfit\',sans-serif;font-weight:800;font-size:0.88rem;' +
+                        'background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);' +
+                        'color:#f87171;padding:4px 14px;border-radius:20px;">' + ideaA.name + '</span>' +
+                        '<span style="color:var(--text-3);font-size:0.8rem;font-family:\'DM Mono\',monospace;">vs</span>' +
+                        '<span style="font-family:\'Outfit\',sans-serif;font-weight:800;font-size:0.88rem;' +
+                        'background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);' +
+                        'color:var(--indigo-2);padding:4px 14px;border-radius:20px;">' + ideaB.name + '</span>' +
+                        // Download button for the comparison
+                        '<button onclick="downloadCompareResult()" style="margin-left:auto;' +
+                        'background:rgba(255,255,255,0.05);border:1px solid var(--border-2);' +
+                        'color:var(--text-2);padding:5px 14px;border-radius:8px;cursor:pointer;' +
+                        'font-family:\'Outfit\',sans-serif;font-size:0.78rem;font-weight:600;' +
+                        'transition:all 0.2s;" ' +
+                        'onmouseover="this.style.background=\'rgba(255,255,255,0.1)\'" ' +
+                        'onmouseout="this.style.background=\'rgba(255,255,255,0.05)\'">↓ Download</button>' +
+                    '</div>' +
+                    '<div class="md-output" style="font-size:0.88rem;">' + fullHtml + '</div>' +
+                '</div>';
+
+            // Store for the download function
+            window._lastCompareHtml = fullHtml;
+            window._lastCompareTitle = ideaA.name + " vs " + ideaB.name;
+        } catch(e) {
+            result.innerHTML = '<div style="grid-column:1/-1;color:#f87171;padding:40px;text-align:center;">Comparison failed. Is the server running?</div>';
+        }
+    }
+
+    // ================================================================
+    // PDF EXPORT — hits /export-pdf on the server
+    // ================================================================
+    async function exportIdea() {
+        const idea = ideas[currentIdea];
+        const btn  = document.getElementById("export-btn");
+        btn.textContent = "Generating\u2026";
+        btn.disabled    = true;
+
+        const tabs = {};
+        Object.entries(idea.tabs).forEach(([tab, msgs]) => {
+            tabs[tab] = msgs.map(m => ({
+                role: m.className.includes("msg-user") ? "user" : "ai",
+                text: m.content.replace(/<[^>]+>/g,'').trim()
+            })).filter(m => m.text);
+        });
+
+        const saved = getSavedResults().map(r => {
+            const d = document.createElement("div");
+            d.innerHTML = r.html;
+            return { title:r.title, time:r.time, text:d.textContent.trim() };
+        });
+
+        try {
+            const res = await fetch("/export-pdf", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body: JSON.stringify({ ideaName:idea.name, tabs, saved })
+            });
+            if (!res.ok) throw new Error("Server error");
+            const blob = await res.blob();
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement("a");
+            a.href     = url;
+            a.download = idea.name.replace(/\s+/g,"-") + "-IdeaForgr.pdf";
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch(e) {
+            alert("Export failed. Make sure the server is running and pdfkit is installed (npm install pdfkit).");
+        } finally {
+            btn.textContent = "\u2193 Export PDF";
+            btn.disabled    = false;
+        }
+    }
+
+
+
+    // ================================================================
+    // GEMINI LIVE ENGINE
+    //
+    // How it works end-to-end:
+    //
+    //  1. User clicks the mic button → openLive() → we connect a WebSocket
+    //     to our server's /live endpoint (server.js WebSocket proxy).
+    //
+    //  2. We tell the server to start a Gemini Live session, passing the
+    //     current idea's context so Gemini knows what we're working on.
+    //
+    //  3. We capture the mic with AudioContext, resample to 16kHz PCM
+    //     (what Gemini Live requires), and stream it chunk by chunk over
+    //     the WebSocket.
+    //
+    //  4. The server forwards audio → Gemini and forwards Gemini's audio
+    //     chunks back to us. We decode the PCM and play it through a
+    //     Web Audio destination node.
+    //
+    //  5. Both sides send text transcripts alongside the audio, which we
+    //     display as live captions in the transcript area.
+    //
+    //  6. User clicks End Session → we tell the server to stop →
+    //     the server closes the Gemini session cleanly.
+    // ================================================================
+
+    // ── State ──
+    let liveWs           = null;   // WebSocket to our server
+    let liveAudioCtx     = null;   // AudioContext for capture + playback
+    let liveMicStream    = null;   // MediaStream from getUserMedia
+    let liveMicProcessor = null;   // ScriptProcessorNode for PCM extraction
+    let liveSessionOpen  = false;
+    let liveRecording    = false;
+    let liveAnimFrame    = null;   // requestAnimationFrame id for visualiser
+    let liveAnalyser     = null;   // AnalyserNode for the visualiser
+    let liveGeminiPlaying = false; // true while Gemini audio is playing
+
+    // Audio playback queue — Gemini sends PCM chunks, we enqueue them
+    // and play them sequentially to avoid gaps and overlaps.
+    let playbackQueue    = [];
+    let playbackPlaying  = false;
+
+    // ── Build the 20 waveform bars on first open ──
+    function buildVisualiserBars() {
+        const vis = document.getElementById("live-visualiser");
+        if (vis.children.length > 0) return; // already built
+        for (let i = 0; i < 20; i++) {
+            const bar = document.createElement("div");
+            bar.className = "vbar";
+            bar.style.height = "6px";
+            // Random max height per bar so the wave looks organic
+            bar.style.setProperty("--h", (12 + Math.random() * 36) + "px");
+            vis.appendChild(bar);
+        }
+    }
+
+    // ── Visualiser animation loop ──
+    // When idle: bars sit at 4px.
+    // When listening/speaking: bars animate via CSS (@keyframes waveAnim)
+    // and we also drive the height dynamically from the AnalyserNode.
+    function startVisualiser(analyser) {
+        const bars = document.querySelectorAll(".vbar");
+        const buf  = new Uint8Array(analyser.frequencyBinCount);
+        liveAnimFrame = requestAnimationFrame(function tick() {
+            analyser.getByteFrequencyData(buf);
+            bars.forEach((bar, i) => {
+                const idx    = Math.floor(i * buf.length / bars.length);
+                const height = 4 + (buf[idx] / 255) * 48;
+                bar.style.height = height + "px";
+            });
+            liveAnimFrame = requestAnimationFrame(tick);
+        });
+    }
+
+    function stopVisualiser() {
+        if (liveAnimFrame) { cancelAnimationFrame(liveAnimFrame); liveAnimFrame = null; }
+        document.querySelectorAll(".vbar").forEach(b => b.style.height = "4px");
+    }
+
+    // ── Open the Live modal ──
+    function openLive() {
+        buildVisualiserBars();
+        document.getElementById("live-popup").style.display = "flex";
+        // Show which idea context will be sent to Gemini
+        const name = ideas[currentIdea]?.name || "Idea 1";
+        document.getElementById("live-idea-info").textContent =
+            `Context: "${name}" · ${Object.values(ideas[currentIdea]?.tabs || {}).flat().length} messages`;
+        setLiveStatus("Ready — press the mic to start");
+    }
+
+    // ── Close the modal (also ends any active session) ──
+    function closeLive() {
+        endLiveSession();
+        document.getElementById("live-popup").style.display = "none";
+    }
+
+    // ── Set the status label text ──
+    function setLiveStatus(text) {
+        document.getElementById("live-status").textContent = text;
+    }
+
+    // ── Append a line to the transcript area ──
+    function appendTranscript(text, role) {
+        const box = document.getElementById("live-transcript");
+        const ph  = document.getElementById("lt-placeholder");
+        if (ph) ph.remove();
+
+        const div = document.createElement("div");
+        div.className = role === "user" ? "lt-user" : "lt-gemini";
+        div.textContent = text;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // ── Mic button handler — first click starts session + recording ──
+    function handleMicBtn() {
+        if (!liveSessionOpen) {
+            startLiveSession();
+        } else if (liveRecording) {
+            // Already recording — tap to pause (stop sending audio chunks)
+            stopMicCapture();
+            setLiveStatus("Paused — tap mic to resume");
+        } else {
+            // Paused — tap to resume
+            resumeMicCapture();
+            setLiveStatus("Listening…");
+        }
+    }
+
+    // ── Start the full Live session ──
+    async function startLiveSession() {
+        // Visual feedback immediately
+        const micBtn = document.getElementById("live-mic-btn");
+        micBtn.className = "loading";
+        setLiveStatus("Connecting to Gemini Live…");
+        document.getElementById("live-end-btn").style.display = "block";
+
+        // ── 1. Open the WebSocket to our server proxy ──
+        const proto = location.protocol === "https:" ? "wss" : "ws";
+        liveWs = new WebSocket(`${proto}://${location.host}/live`);
+
+        liveWs.onopen = () => {
+            // ── 2. Tell the server to start a Gemini Live session,
+            //       passing a compact summary of the current idea ──
+            const idea = ideas[currentIdea];
+            const context = Object.entries(idea.tabs)
+                .map(([tab, msgs]) => {
+                    const text = msgs.map(m => m.content.replace(/<[^>]+>/g,'')).join(" ").slice(0, 400);
+                    return text ? tab + ": " + text : null;
+                }).filter(Boolean).join("\n").slice(0, 1200);
+
+            liveWs.send(JSON.stringify({
+                type: "start",
+                ideaContext: "Idea name: " + idea.name + "\n\n" + context
+            }));
+        };
+
+        liveWs.onmessage = async (event) => {
+            const msg = JSON.parse(event.data);
+
+            switch (msg.type) {
+                // ── Session is open and Gemini is ready ──
+                case "ready":
+                    liveSessionOpen = true;
+                    document.getElementById("live-box").classList.remove("listening");
+                    setLiveStatus("Listening…");
+                    document.getElementById("live-btn").classList.add("active");
+                    await startMicCapture();
+                    break;
+
+                // ── Gemini is sending audio back (PCM base64 chunks) ──
+                case "audio":
+                    liveGeminiPlaying = true;
+                    document.getElementById("live-box").classList.remove("listening");
+                    document.getElementById("live-box").classList.add("speaking");
+                    enqueueAudio(msg.data);
+                    break;
+
+                // ── What the user said (speech-to-text from Gemini) ──
+                case "transcript_in":
+                    if (msg.text?.trim()) appendTranscript(msg.text, "user");
+                    break;
+
+                // ── What Gemini said (text version of its voice response) ──
+                case "transcript_out":
+                    if (msg.text?.trim()) appendTranscript(msg.text, "gemini");
+                    break;
+
+                // ── Gemini finished its turn ──
+                case "turn_complete":
+                    liveGeminiPlaying = false;
+                    document.getElementById("live-box").classList.remove("speaking");
+                    document.getElementById("live-box").classList.add("listening");
+                    setLiveStatus("Listening…");
+                    break;
+
+                case "error":
+                    setLiveStatus("Error: " + msg.message);
+                    micBtn.className = "idle";
+                    break;
+
+                case "closed":
+                    setLiveStatus("Session ended");
+                    cleanupLive();
+                    break;
+            }
+        };
+
+        liveWs.onerror = () => {
+            setLiveStatus("Connection failed — is the server running?");
+            micBtn.className = "idle";
+        };
+
+        liveWs.onclose = () => {
+            if (liveSessionOpen) {
+                setLiveStatus("Session ended");
+                cleanupLive();
+            }
+        };
+    }
+
+    // ── Capture microphone, resample to 16kHz PCM, stream to server ──
+    async function startMicCapture() {
+        try {
+            liveMicStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        } catch(e) {
+            setLiveStatus("Microphone access denied");
+            endLiveSession();
+            return;
+        }
+
+        // Create AudioContext at native sample rate (typically 48kHz or 44.1kHz)
+        liveAudioCtx = new AudioContext();
+        const source = liveAudioCtx.createMediaStreamSource(liveMicStream);
+
+        // AnalyserNode drives the visualiser bars
+        liveAnalyser = liveAudioCtx.createAnalyser();
+        liveAnalyser.fftSize = 64;
+        source.connect(liveAnalyser);
+        startVisualiser(liveAnalyser);
+
+        // ScriptProcessorNode captures raw samples.
+        // We use 4096-sample buffers at the native rate, then downsample
+        // to 16000 Hz (what Gemini Live requires) before sending.
+        const bufSize  = 4096;
+        const nativeSR = liveAudioCtx.sampleRate;
+        const targetSR = 16000;
+        liveMicProcessor = liveAudioCtx.createScriptProcessor(bufSize, 1, 1);
+
+        liveMicProcessor.onaudioprocess = (e) => {
+            if (!liveRecording || !liveWs || liveWs.readyState !== WebSocket.OPEN) return;
+
+            const samples = e.inputBuffer.getChannelData(0); // Float32 at nativeSR
+            // Downsample with simple linear interpolation
+            const ratio      = nativeSR / targetSR;
+            const outLen     = Math.floor(samples.length / ratio);
+            const pcm16      = new Int16Array(outLen);
+            for (let i = 0; i < outLen; i++) {
+                const srcIdx = i * ratio;
+                const lo     = Math.floor(srcIdx);
+                const hi     = Math.min(lo + 1, samples.length - 1);
+                const t      = srcIdx - lo;
+                const s      = samples[lo] * (1 - t) + samples[hi] * t;
+                // Clamp to [-1, 1] then scale to Int16 range
+                pcm16[i] = Math.max(-32768, Math.min(32767, s * 32767));
+            }
+            // Convert to base64 for JSON transport
+            const bytes  = new Uint8Array(pcm16.buffer);
+            const b64    = btoa(String.fromCharCode(...bytes));
+            liveWs.send(JSON.stringify({ type: "audio", data: b64 }));
+        };
+
+        source.connect(liveMicProcessor);
+        // ScriptProcessor must be connected to destination to actually fire
+        liveMicProcessor.connect(liveAudioCtx.destination);
+
+        liveRecording = true;
+        document.getElementById("live-mic-btn").className = "recording";
+        document.getElementById("live-box").classList.add("listening");
+        document.getElementById("mic-icon-on").style.display   = "none";
+        document.getElementById("mic-icon-stop").style.display = "block";
+    }
+
+    function stopMicCapture() {
+        liveRecording = false;
+        document.getElementById("live-mic-btn").className = "idle";
+        document.getElementById("live-box").classList.remove("listening");
+        document.getElementById("mic-icon-on").style.display   = "block";
+        document.getElementById("mic-icon-stop").style.display = "none";
+    }
+
+    function resumeMicCapture() {
+        liveRecording = true;
+        document.getElementById("live-mic-btn").className = "recording";
+        document.getElementById("live-box").classList.add("listening");
+        document.getElementById("mic-icon-on").style.display   = "none";
+        document.getElementById("mic-icon-stop").style.display = "block";
+    }
+
+    // ── Decode and play Gemini's audio response ──
+    // Gemini sends raw 16-bit PCM at 24kHz as base64 chunks.
+    // We decode each chunk, create an AudioBuffer, and play them
+    // sequentially through the AudioContext.
+    function enqueueAudio(b64) {
+        // Decode base64 → Int16Array → Float32Array
+        const binary  = atob(b64);
+        const bytes   = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const pcm16   = new Int16Array(bytes.buffer);
+        const float32 = new Float32Array(pcm16.length);
+        for (let i = 0; i < pcm16.length; i++) float32[i] = pcm16[i] / 32768;
+
+        playbackQueue.push(float32);
+        if (!playbackPlaying) drainPlaybackQueue();
+    }
+
+    async function drainPlaybackQueue() {
+        if (!liveAudioCtx || playbackQueue.length === 0) {
+            playbackPlaying = false;
+            return;
+        }
+        playbackPlaying = true;
+        const samples = playbackQueue.shift();
+        // Gemini Live outputs at 24000 Hz
+        const geminiSR = 24000;
+        const buf = liveAudioCtx.createBuffer(1, samples.length, geminiSR);
+        buf.copyToChannel(samples, 0);
+        const src = liveAudioCtx.createBufferSource();
+        src.buffer = buf;
+        src.connect(liveAudioCtx.destination);
+        src.onended = drainPlaybackQueue;
+        src.start();
+    }
+
+    // ── End the session and clean up everything ──
+    function endLiveSession() {
+        if (liveWs && liveWs.readyState === WebSocket.OPEN) {
+            liveWs.send(JSON.stringify({ type: "stop" }));
+            liveWs.close();
+        }
+        cleanupLive();
+    }
+
+    function cleanupLive() {
+        liveSessionOpen  = false;
+        liveRecording    = false;
+        liveGeminiPlaying = false;
+        playbackQueue    = [];
+        playbackPlaying  = false;
+
+        if (liveMicProcessor) { try { liveMicProcessor.disconnect(); } catch {} liveMicProcessor = null; }
+        if (liveMicStream)    { liveMicStream.getTracks().forEach(t => t.stop()); liveMicStream = null; }
+        if (liveAudioCtx)     { try { liveAudioCtx.close(); } catch {} liveAudioCtx = null; }
+        liveAnalyser = null;
+
+        stopVisualiser();
+
+        document.getElementById("live-btn").classList.remove("active");
+        document.getElementById("live-box").classList.remove("listening", "speaking");
+        document.getElementById("live-mic-btn").className = "idle";
+        document.getElementById("live-end-btn").style.display = "none";
+        document.getElementById("mic-icon-on").style.display   = "block";
+        document.getElementById("mic-icon-stop").style.display = "none";
+    }
+
+    // ================================================================
+    // DROPDOWN
+    // ================================================================
+    function toggleDropdown(e) {
+        e.stopPropagation();
+        const dd = document.getElementById("tool-dropdown");
+        dd.style.display = dd.style.display === "flex" ? "none" : "flex";
+    }
+    function closeDropdown() {
+        document.getElementById("tool-dropdown").style.display = "none";
+    }
+    document.addEventListener("click", (e) => {
+        const dd = document.getElementById("tool-dropdown");
+        const btn = document.getElementById("plus-btn");
+        if (dd && dd.style.display === "flex" && !dd.contains(e.target) && e.target !== btn)
+            closeDropdown();
+    });
+    </script>
+
+    <!-- Compare Modal -->
+    <div id="compare-popup" style="position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:99999;">
+        <div style="width:900px;max-width:96vw;max-height:88vh;background:var(--surface-2);border-radius:var(--r-xl);border:1px solid var(--border-2);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 100px rgba(0,0,0,0.8);">
+            <div style="padding:22px 28px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+                <span style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:800;">⚡ Compare Ideas</span>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <select id="compare-idea-a" style="background:var(--surface-3);border:1px solid var(--border-2);color:var(--text);padding:6px 12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:0.85rem;outline:none;"></select>
+                    <span style="color:var(--text-3);font-size:0.8rem;">vs</span>
+                    <select id="compare-idea-b" style="background:var(--surface-3);border:1px solid var(--border-2);color:var(--text);padding:6px 12px;border-radius:8px;font-family:'Outfit',sans-serif;font-size:0.85rem;outline:none;"></select>
+                    <button onclick="runCompare()" style="background:var(--grad-brand);border:none;color:#fff;padding:7px 18px;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;">Compare ⚡</button>
+                    <button onclick="document.getElementById('compare-popup').style.display='none'" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text-2);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;">✕</button>
+                </div>
+            </div>
+            <div id="compare-result" style="overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:0;flex:1;">
+                <div style="color:var(--text-3);font-size:0.85rem;grid-column:1/-1;text-align:center;padding:40px 0;">Select two ideas above and click Compare.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guide Modal — v2 (fully updated) -->
+    <div id="guide-popup" style="position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:99999;">
+        <div style="width:680px;max-width:94vw;max-height:88vh;background:var(--surface-2);border-radius:24px;border:1px solid var(--border-2);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 32px 100px rgba(0,0,0,0.8);">
+
+            <!-- Header -->
+            <div style="padding:22px 28px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;position:relative;">
+                <div>
+                    <div style="font-family:'Outfit',sans-serif;font-size:1.1rem;font-weight:900;letter-spacing:-0.3px;">⚒ IdeaForgr AI — Complete Guide</div>
+                    <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-3);letter-spacing:1px;margin-top:3px;">v2.0 · All features documented</div>
+                </div>
+                <button onclick="document.getElementById('guide-popup').style.display='none'" style="background:rgba(255,255,255,0.05);border:1px solid var(--border-2);color:var(--text-2);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-family:'Outfit',sans-serif;font-weight:600;">✕ Close</button>
+            </div>
+
+            <!-- Scrollable content -->
+            <div style="overflow-y:auto;padding:24px 28px 32px;line-height:1.72;font-size:0.9rem;color:var(--text);">
+                <div style="display:grid;gap:14px;">
+
+                    <!-- Ideas & Tabs -->
+                    <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:#a5b4fc;">💡 Ideas & Tabs</div>
+                        <p>Click <strong>＋ New Idea</strong> to open a separate workspace for each startup concept. Each idea gets its own set of chat tabs: <em>Chat, Research, Pitch,</em> and <em>Notes</em> by default, but you can add unlimited custom tabs with the <strong>＋</strong> button in the tab bar. Double-click any idea tab or sub-tab to rename it. Hover over a tab to reveal its <strong>×</strong> delete button. The AI is cross-tab aware — when you chat in the Pitch tab, it already knows what's in your Research tab.</p>
+                    </div>
+
+                    <!-- Chat & Voice -->
+                    <div style="background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:#fb923c;">⚒ Chat & Voice Input</div>
+                        <p>Type in the input box and press <strong>Enter</strong> to send (Shift+Enter for a new line). The AI knows your idea name and the last 6 messages of conversation, so answers are always in context. Click the <strong>🎙 microphone button</strong> to use voice input — it transcribes your speech in real time and auto-sends when you stop speaking. Requires Chrome or Edge. Use the <strong>＋ dropdown</strong> to activate a mode (Research, Pitch, SWOT, Names) which pre-fills the input with a smart prompt you can extend before sending.</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div style="background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:#67e8f9;">✨ Smart Start & Auto-Naming</div>
+                        <p>Every new idea greets you with <strong>5 starter prompt chips</strong> covering the most important startup questions — business model, target customer, competitors, MVP scope, and problem definition. Click any chip to instantly send that question. After your first message in a new idea, the AI will <strong>suggest a name</strong> based on your description — accept it with one click or dismiss it. The empty state disappears permanently once an idea has its first message.</p>
+                    </div>
+
+                    <!-- Workspace Tools -->
+                    <div style="background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:#34d399;">🔬 Workspace Tools</div>
+                        <p>The right panel has 6 one-click tools. <strong>Research</strong> delivers a structured market report using live Google Search grounding (falls back to AI training data if search quota is exceeded). <strong>Summary</strong> builds a concise investor-ready elevator pitch. <strong>Names</strong> generates 10 creative, brandable startup names. <strong>Pitch</strong> writes a 60-second investor pitch script. <strong>SWOT</strong> runs a full Strengths/Weaknesses/Opportunities/Threats analysis. <strong>Logo</strong> opens the SVG logo generator. Every result opens in a popup with <strong>Copy</strong> and <strong>↓ Download</strong> buttons, and is also saved to the history list below the tools. Click any saved entry to reopen it, or × to delete it. Saved results persist across page refreshes.</p>
+                    </div>
+
+                    <!-- Iterative Refinement -->
+                    <div style="background:rgba(167,139,250,0.07);border:1px solid rgba(167,139,250,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:#c4b5fd;">🔄 Iterative Refinement</div>
+                        <p>After any workspace tool generates a result, a row of <strong>Refine chips</strong> appears at the bottom of the popup. These let you iterate on the result without starting over — for example, after a Pitch you can click "Make it punchier" or "Add specific numbers" and the AI will rewrite just that part using the original result as context. Each workspace tool has its own set of refinement options tailored to what makes sense for that type of output.</p>
+                    </div>
+
+                    <!-- Logo Generator -->
+                    <div style="background:rgba(217,70,239,0.07);border:1px solid rgba(217,70,239,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:#e879f9;">✨ Logo Generator</div>
+                        <p>Click <strong>Logo</strong> in the workspace panel or <strong>✨ Generate Logo</strong> in the + dropdown. Choose a primary color, a style, and an optional tagline. Eight styles are available: <em>Minimal/Lettermark, Badge/Shield, Geometric, Tech/Circuit, Wordmark (full name), Neon Glow, Monogram (stacked letters), Split Color (diagonal two-tone).</em> The result is a pure SVG — right-click the preview image to save it, or expand "View SVG code" to copy the raw markup into any design tool.</p>
+                    </div>
+
+                    <!-- Compare Ideas -->
+                    <div style="background:rgba(34,211,238,0.07);border:1px solid rgba(34,211,238,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:var(--cyan);">⚡ Compare Ideas</div>
+                        <p>Click <strong>⚡ Compare</strong> in the action bar to open the comparison tool. Select any two ideas from the dropdowns and click Compare. The AI reads all the notes, chats, and research from both workspaces and produces a side-by-side analysis covering Market Potential, Competitive Advantage, Key Risks, a score out of 10 for each, and a Final Verdict. The comparison uses live Google Search grounding when available. Use the <strong>↓ Download</strong> button inside the panel to save the result as a text file.</p>
+                    </div>
+
+                    <!-- Export -->
+                    <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:var(--gold);">📄 Export to PDF</div>
+                        <p>Click <strong>↓ Export PDF</strong> in the action bar to download the current idea as a dark-themed, multi-page PDF. The document includes a cover page with your idea name, a section for each tab (Chat, Research, Pitch, Notes, and any custom tabs you've added) with messages formatted as a conversation, and an appendix of all saved workspace results. Page numbers are added automatically. Requires <code>pdfkit</code> installed on the server (<code>npm install pdfkit</code>).</p>
+                    </div>
+
+                    <!-- Data & Storage -->
+                    <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.18);border-radius:16px;padding:18px 20px;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:0.95rem;margin-bottom:8px;color:#f87171;">🗑 Data & Storage</div>
+                        <p>All ideas, chat history, and saved results are stored in your browser's <strong>localStorage</strong> and persist across page refreshes automatically. Click <strong>🗑 Clear Data</strong> in the action bar to wipe everything and start fresh (this cannot be undone). Individual saved workspace results can be deleted with their <strong>×</strong> button. The idea counter in the top-right nav shows how many ideas you currently have.</p>
+                    </div>
+
+                    <!-- Thanks -->
+                    <div style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(255,122,26,0.08));border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:20px 22px;text-align:center;">
+                        <div style="font-family:'Outfit',sans-serif;font-weight:900;font-size:1.05rem;margin-bottom:10px;background:linear-gradient(135deg,#818cf8,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🙏 Special Thanks to Google</div>
+                        <p style="color:var(--text-2);font-size:0.88rem;line-height:1.75;">IdeaForgr AI is powered by <strong style="color:var(--text);">Google Gemini</strong> — the same intelligence that understands your ideas, researches markets in real time, writes pitches, and forges your vision into something real. The live search grounding that makes Research results accurate is built on <strong style="color:var(--text);">Google Search</strong>. We're deeply grateful to Google for building AI that is both powerful and accessible to builders everywhere. Thank you for the tools that make this possible. 🔥</p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         GEMINI LIVE MODAL
+         A full real-time voice session with Gemini.
+         The server.js WebSocket proxy handles the actual
+         Gemini Live API connection.
+    ════════════════════════════════════════════════ -->
+    <div id="live-popup">
+        <div id="live-box">
+            <!-- Top accent line rendered via ::before -->
+
+            <!-- Header -->
+            <div id="live-header">
+                <div id="live-header-left">
+                    <span id="live-title">🔴 Gemini Live</span>
+                    <span id="live-subtitle">REAL-TIME VOICE · POWERED BY GEMINI LIVE API</span>
+                </div>
+                <button id="live-close-btn" onclick="closeLive()">✕ Close</button>
+            </div>
+
+            <!-- Animated waveform visualiser (20 bars) -->
+            <div id="live-visualiser">
+                <!-- JS fills these in with random heights per animation frame -->
+            </div>
+
+            <!-- Status label -->
+            <div id="live-status">Ready — press the mic to start</div>
+
+            <!-- Transcript / conversation -->
+            <div id="live-transcript">
+                <div class="lt-placeholder" id="lt-placeholder">
+                    Your conversation will appear here in real time.
+                </div>
+            </div>
+
+            <!-- Idea context info -->
+            <div id="live-idea-info"></div>
+
+            <!-- Controls -->
+            <div id="live-controls">
+                <button id="live-end-btn" onclick="endLiveSession()" style="display:none;">
+                    ⏹ End Session
+                </button>
+                <button id="live-mic-btn" class="idle" onclick="handleMicBtn()">
+                    <!-- Mic icon (idle / off) -->
+                    <svg class="live-mic-icon" id="mic-icon-on" width="26" height="26"
+                        viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8"  y1="23" x2="16" y2="23"/>
+                    </svg>
+                    <!-- Stop icon (recording) — hidden by default -->
+                    <svg class="live-mic-icon" id="mic-icon-stop" width="22" height="22"
+                        viewBox="0 0 24 24" fill="white" stroke="none"
+                        style="display:none;">
+                        <rect x="4" y="4" width="16" height="16" rx="3"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

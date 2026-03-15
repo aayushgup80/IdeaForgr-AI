@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IdeaForgr AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <style>
+
+        :root {
+            --bg:         #020209;
+            --surface:    #080816;
+            --surface-2:  #0c0c1e;
+            --border:     rgba(255,255,255,0.06);
+            --border-2:   rgba(255,255,255,0.11);
+            --forge:      #ff7a1a;
+            --forge-2:    #ff4d00;
+            --indigo:     #6366f1;
+            --indigo-2:   #818cf8;
+            --violet:     #a78bfa;
+            --cyan:       #22d3ee;
+            --text:       #eef0ff;
+            --text-2:     #9399b2;
+            --text-3:     #4e536b;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: "";
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 75% 55% at 10% 5%,
+                    rgba(99,102,241,0.22) 0%, transparent 60%),
+                radial-gradient(ellipse 55% 40% at 90% 10%,
+                    rgba(255,122,26,0.13) 0%, transparent 55%),
+                radial-gradient(ellipse 45% 55% at 55% 98%,
+                    rgba(167,139,250,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse 35% 30% at 70% 55%,
+                    rgba(34,211,238,0.07) 0%, transparent 50%);
+            animation: auroraShift 18s ease-in-out infinite alternate;
+        }
+        @keyframes auroraShift {
+            0%   { opacity:0.75; transform:scale(1)    translateY(0); }
+            50%  { opacity:1;    transform:scale(1.05) translateY(-14px); }
+            100% { opacity:0.65; transform:scale(0.97) translateY(8px); }
+        }
+
+        body::after {
+            content: "";
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            opacity: 0.032;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 180px 180px;
+        }
+
+        .orb {
+            position: fixed; border-radius: 50%; pointer-events: none;
+            z-index: 0; filter: blur(90px); opacity: 0.11;
+        }
+        .orb-1 {
+            width: 520px; height: 520px; top: -130px; left: -110px;
+            background: radial-gradient(circle, #6366f1, transparent 70%);
+            animation: od1 24s ease-in-out infinite alternate;
+        }
+        .orb-2 {
+            width: 420px; height: 420px; top: 15%; right: -90px;
+            background: radial-gradient(circle, #ff7a1a, transparent 70%);
+            animation: od2 30s ease-in-out infinite alternate;
+        }
+        .orb-3 {
+            width: 360px; height: 360px; bottom: -70px; left: 28%;
+            background: radial-gradient(circle, #a78bfa, transparent 70%);
+            animation: od3 21s ease-in-out infinite alternate;
+        }
+        @keyframes od1 { from{transform:translate(0,0) scale(1)}   to{transform:translate(45px,35px) scale(1.1)} }
+        @keyframes od2 { from{transform:translate(0,0) scale(1)}   to{transform:translate(-35px,55px) scale(0.9)} }
+        @keyframes od3 { from{transform:translate(0,0) scale(1)}   to{transform:translate(25px,-45px) scale(1.06)} }
+
+        .dot-grid {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.065) 1px, transparent 1px);
+            background-size: 24px 24px;
+            mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+        }
+
+        .stage {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 0;
+        }
+
+        .brand {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 52px;
+            opacity: 0;
+            animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s forwards;
+        }
+        .brand-icon {
+            width: 52px; height: 52px; border-radius: 16px;
+            background: linear-gradient(135deg, #6366f1, #a78bfa);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow:
+                0 8px 28px rgba(99,102,241,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            position: relative; overflow: hidden;
+        }
+
+        .brand-icon::after {
+            content: "";
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 55%);
+        }
+        .brand-icon svg { position: relative; z-index: 1; }
+        .brand-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px;
+            color: var(--text);
+        }
+        .brand-name span {
+            background: linear-gradient(135deg, #818cf8, #c084fc, #ff7a1a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .forge-wrap {
+            position: relative;
+            width: 220px; height: 200px;
+            margin-bottom: 44px;
+            opacity: 0;
+            animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.5s forwards;
+        }
+
+        #hammer-arm {
+            transform-origin: 50% 10%;
+            animation: hammerStrike 2.4s cubic-bezier(0.25,0.46,0.45,0.94) infinite;
+        }
+        @keyframes hammerStrike {
+            0%   { transform: rotate(-38deg); }
+            38%  { transform: rotate(-38deg); } 
+            55%  { transform: rotate(12deg);  } 
+            62%  { transform: rotate(6deg);   } 
+            68%  { transform: rotate(10deg);  } 
+            80%  { transform: rotate(10deg);  } 
+            100% { transform: rotate(-38deg); } 
+        }
+
+        #sparks {
+            position: absolute; bottom: 36px; left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+        .spark {
+            position: absolute; width: 3px; height: 3px; border-radius: 50%;
+            background: var(--forge); top: 0; left: 0;
+            transform-origin: 0 0;
+            opacity: 0;
+            animation: sparkFly 2.4s ease-out infinite;
+        }
+
+        .spark:nth-child(1)  { animation-delay: 0s;     --dx:-42px; --dy:-38px; --rot:  10deg; }
+        .spark:nth-child(2)  { animation-delay: 0.04s;  --dx: 40px; --dy:-45px; --rot:-12deg; background:#fbbf24; }
+        .spark:nth-child(3)  { animation-delay: 0.08s;  --dx:-60px; --dy:-20px; --rot:  22deg; background:#ff4d00; }
+        .spark:nth-child(4)  { animation-delay: 0.06s;  --dx: 58px; --dy:-18px; --rot:- 8deg; }
+        .spark:nth-child(5)  { animation-delay: 0.02s;  --dx:-24px; --dy:-55px; --rot:  16deg; background:#fbbf24; }
+        .spark:nth-child(6)  { animation-delay: 0.10s;  --dx: 22px; --dy:-52px; --rot:- 5deg; background:#ff4d00; }
+        .spark:nth-child(7)  { animation-delay: 0.03s;  --dx:-70px; --dy:-30px; --rot:  30deg; }
+        .spark:nth-child(8)  { animation-delay: 0.07s;  --dx: 65px; --dy:-35px; --rot:-18deg; background:#fbbf24; }
+        @keyframes sparkFly {
+
+            0%,53% { opacity:0; transform:translate(0,0) scale(0) rotate(0deg); }
+
+            56%    { opacity:1; transform:translate(calc(var(--dx)*0.3), calc(var(--dy)*0.3)) scale(1.4) rotate(var(--rot)); }
+            72%    { opacity:0.8; transform:translate(var(--dx), var(--dy)) scale(0.8) rotate(calc(var(--rot)*1.5)); }
+            82%    { opacity:0; transform:translate(calc(var(--dx)*1.3), calc(var(--dy)*1.5+10px)) scale(0); }
+            100%   { opacity:0; }
+        }
+
+        #anvil-glow {
+            animation: anvilPulse 2.4s ease-out infinite;
+        }
+        @keyframes anvilPulse {
+            0%,52%  { opacity:0; r: 20; }
+            57%     { opacity:0.7; r: 30; }
+            72%     { opacity:0.2; r: 38; }
+            82%     { opacity:0; r: 20; }
+            100%    { opacity:0; }
+        }
+
+        .status-wrap {
+            display: flex; flex-direction: column; align-items: center; gap: 14px;
+            margin-bottom: 48px;
+            opacity: 0;
+            animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.8s forwards;
+        }
+
+        .progress-track {
+            width: 260px; height: 2px; border-radius: 2px;
+            background: rgba(255,255,255,0.07);
+            overflow: hidden; position: relative;
+        }
+        .progress-fill {
+            height: 100%; width: 0%; border-radius: 2px;
+            background: linear-gradient(90deg, var(--indigo), var(--violet), var(--forge));
+            transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+            box-shadow: 0 0 10px rgba(99,102,241,0.6);
+        }
+
+        .progress-fill::after {
+            content:"";
+            position:absolute; top:0; right:0; width:40px; height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.5),transparent);
+            animation: shimmer 1.2s linear infinite;
+        }
+        @keyframes shimmer {
+            from { transform:translateX(-40px); }
+            to   { transform:translateX(260px); }
+        }
+
+        #status-label {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.72rem; font-weight: 400;
+            color: var(--text-3); letter-spacing: 2px;
+            text-transform: uppercase;
+            min-height: 1.2em; text-align: center;
+            transition: color 0.4s;
+        }
+        #status-label.ready {
+            color: #34d399;
+            text-shadow: 0 0 12px rgba(52,211,153,0.5);
+        }
+
+        .step-dots {
+            display: flex; gap: 8px; align-items: center;
+        }
+        .dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: var(--text-3); transition: all 0.4s;
+        }
+        .dot.done  { background: var(--indigo); box-shadow: 0 0 8px rgba(99,102,241,0.6); transform: scale(1.2); }
+        .dot.active { background: var(--forge); box-shadow: 0 0 10px rgba(255,122,26,0.7); transform: scale(1.4); animation: dotPulse 0.6s ease-in-out infinite alternate; }
+        @keyframes dotPulse {
+            from { transform: scale(1.2); opacity:0.8; }
+            to   { transform: scale(1.6); opacity:1; }
+        }
+
+        #btn-container {
+            opacity: 0;
+
+            transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1),
+                        transform 0.6s cubic-bezier(0.22,1,0.36,1);
+            transform: translateY(12px);
+        }
+        #btn-container.visible {
+            opacity: 1; transform: translateY(0);
+        }
+
+        #enter-btn {
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            padding: 17px 52px;
+            border: none; border-radius: 18px; cursor: pointer;
+            background: linear-gradient(135deg, #6366f1 0%, #a78bfa 55%, #ff7a1a 100%);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px;
+
+            box-shadow:
+                0 8px 40px rgba(99,102,241,0.5),
+                0 2px 0 rgba(255,255,255,0.1) inset,
+                0 -2px 0 rgba(0,0,0,0.2) inset;
+            transition: all 0.28s cubic-bezier(0.22,1,0.36,1);
+            min-width: 280px;
+        }
+
+        #enter-btn::before {
+            content:"";
+            position:absolute; top:0; left:0; right:0; height:50%;
+            background:linear-gradient(180deg,rgba(255,255,255,0.16) 0%,transparent 100%);
+            border-radius:18px 18px 0 0;
+        }
+
+        #enter-btn::after {
+            content:"";
+            position:absolute; top:0; left:-100%; width:50%; height:100%;
+            background:linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition:none;
+        }
+        #enter-btn:hover::after {
+            animation: scanSweep 0.55s ease-in-out forwards;
+        }
+        @keyframes scanSweep {
+            from { left:-60%; }
+            to   { left:120%; }
+        }
+
+        #enter-btn:hover {
+            transform: translateY(-4px) scale(1.025);
+            box-shadow:
+                0 16px 56px rgba(99,102,241,0.65),
+                0 4px 0 rgba(255,255,255,0.12) inset,
+                0 -2px 0 rgba(0,0,0,0.25) inset;
+        }
+        #enter-btn:active {
+            transform: scale(0.975) translateY(0);
+            box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+        }
+
+        .btn-arrow {
+            display: flex; align-items: center; justify-content: center;
+            width: 28px; height: 28px; border-radius: 8px;
+            background: rgba(255,255,255,0.18);
+            transition: transform 0.28s cubic-bezier(0.22,1,0.36,1);
+            position: relative; z-index: 1;
+        }
+        #enter-btn:hover .btn-arrow { transform: translateX(5px); }
+        .btn-label { position: relative; z-index: 1; }
+
+        .version-tag {
+            position: fixed; bottom: 28px;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.65rem; color: var(--text-3);
+            letter-spacing: 1.5px; text-transform: uppercase;
+            z-index: 10;
+            opacity: 0;
+            animation: fadeUp 1s ease 3.6s forwards;
+        }
+
+        .ring {
+            position: absolute; inset: -70px;
+            border-radius: 50%;
+            border: 1px solid transparent;
+            background:
+                linear-gradient(var(--bg), var(--bg)) padding-box,
+                conic-gradient(
+                    from 0deg,
+                    transparent 0%,
+                    rgba(99,102,241,0.5) 20%,
+                    rgba(167,139,250,0.4) 40%,
+                    rgba(255,122,26,0.4) 60%,
+                    rgba(34,211,238,0.3) 80%,
+                    transparent 100%
+                ) border-box;
+            animation: ringRotate 8s linear infinite;
+            pointer-events: none; z-index: -1;
+        }
+        @keyframes ringRotate {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(18px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="dot-grid"></div>
+
+    <div class="stage">
+
+        <div class="ring"></div>
+
+        <div class="brand">
+            <div class="brand-icon">
+
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <rect x="12" y="2" width="4" height="16" rx="1.5" fill="rgba(255,255,255,0.3)"/>
+                    <rect x="12.5" y="2.5" width="1.2" height="15" rx="0.6" fill="rgba(255,255,255,0.2)"/>
+                    <path d="M5 17 L23 17 A2 2 0 0 1 25 19 L25 23 A2 2 0 0 1 23 25 L5 25 A2 2 0 0 1 3 23 L3 19 A2 2 0 0 1 5 17 Z" fill="rgba(255,255,255,0.9)"/>
+                    <rect x="6" y="25" width="16" height="2.5" rx="1" fill="#ff7a1a" opacity="0.9"/>
+                </svg>
+            </div>
+            <span class="brand-name">IdeaForgr <span>AI</span></span>
+        </div>
+
+        <div class="forge-wrap">
+            <svg id="forge-svg" viewBox="0 0 220 200" width="220" height="200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="hammerGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#818cf8"/>
+                        <stop offset="100%" stop-color="#6366f1"/>
+                    </linearGradient>
+                    <linearGradient id="handleGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#334155"/>
+                        <stop offset="100%" stop-color="#1e293b"/>
+                    </linearGradient>
+                    <linearGradient id="anvilGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#4e536b"/>
+                        <stop offset="100%" stop-color="#1e2035"/>
+                    </linearGradient>
+                    <linearGradient id="anvilTop" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stop-color="#6b7280"/>
+                        <stop offset="50%" stop-color="#9399b2"/>
+                        <stop offset="100%" stop-color="#4e536b"/>
+                    </linearGradient>
+                    <filter id="glowF" x="-40%" y="-40%" width="180%" height="180%">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+                        <feGaussianBlur stdDeviation="8" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <circle id="anvil-glow" cx="110" cy="152" r="20"
+                    fill="#ff7a1a" opacity="0" filter="url(#softGlow)"/>
+
+                <path d="M55 148 Q40 145 32 152 L55 156 Z" fill="url(#anvilGrad)"/>
+
+                <rect x="55" y="140" width="120" height="18" rx="3" fill="url(#anvilGrad)"/>
+                <rect x="55" y="140" width="120" height="5" rx="3" fill="url(#anvilTop)"/>
+
+                <rect x="72" y="158" width="86" height="12" rx="2" fill="#1a1a30"/>
+
+                <rect x="58" y="168" width="110" height="20" rx="4" fill="url(#anvilGrad)"/>
+
+                <line x1="58" y1="169" x2="168" y2="169" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+                <rect x="64" y="186" width="22" height="8" rx="2" fill="#141428"/>
+                <rect x="144" y="186" width="22" height="8" rx="2" fill="#141428"/>
+
+                <rect x="88" y="133" width="50" height="10" rx="3" fill="#ff7a1a" opacity="0.85" filter="url(#glowF)"/>
+                <rect x="91" y="134" width="44" height="5" rx="2" fill="#fbbf24" opacity="0.7"/>
+
+                <g id="hammer-arm">
+
+                    <rect x="106" y="18" width="10" height="72" rx="4" fill="url(#handleGrad)"/>
+
+                    <rect x="106" y="30" width="10" height="3" rx="1.5" fill="rgba(255,255,255,0.06)"/>
+                    <rect x="106" y="40" width="10" height="3" rx="1.5" fill="rgba(255,255,255,0.06)"/>
+                    <rect x="106" y="50" width="10" height="3" rx="1.5" fill="rgba(255,255,255,0.06)"/>
+
+                    <rect x="78" y="78" width="66" height="30" rx="6" fill="url(#hammerGrad)"/>
+
+                    <rect x="78" y="78" width="66" height="8" rx="6" fill="rgba(255,255,255,0.18)"/>
+
+                    <rect x="78" y="82" width="8" height="22" rx="3" fill="#4f52c9"/>
+
+                    <rect x="134" y="82" width="10" height="22" rx="3" fill="#ff7a1a" opacity="0.5" filter="url(#glowF)"/>
+
+                    <circle cx="100" cy="93" r="3" fill="#1e2044"/>
+                    <circle cx="122" cy="93" r="3" fill="#1e2044"/>
+                </g>
+
+                <g opacity="0.18">
+                    <ellipse cx="188" cy="35" rx="7" ry="4" stroke="#9399b2" stroke-width="1.5" fill="none" transform="rotate(-30 188 35)"/>
+                    <ellipse cx="192" cy="46" rx="7" ry="4" stroke="#9399b2" stroke-width="1.5" fill="none" transform="rotate(30 192 46)"/>
+                    <ellipse cx="186" cy="57" rx="7" ry="4" stroke="#9399b2" stroke-width="1.5" fill="none" transform="rotate(-20 186 57)"/>
+                </g>
+
+                <ellipse cx="110" cy="197" rx="70" ry="5" fill="rgba(0,0,0,0.35)"/>
+            </svg>
+
+            <div id="sparks">
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+                <div class="spark"></div>
+            </div>
+        </div>
+
+        <div class="status-wrap">
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p id="status-label">Initializing systems</p>
+            <div class="step-dots">
+                <div class="dot active" id="dot-0"></div>
+                <div class="dot" id="dot-1"></div>
+                <div class="dot" id="dot-2"></div>
+                <div class="dot" id="dot-3"></div>
+            </div>
+        </div>
+
+        <div id="btn-container">
+            <button id="enter-btn" onclick="enterForge()">
+                <span class="btn-label">Open IdeaForgr AI</span>
+                <div class="btn-arrow">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="white" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <p class="version-tag">IdeaForgr AI · v2.0 · Powered by Gemini</p>
+
+    <script>
+
+        const steps = [
+            { label: "Loading assets",          progress: 22,  delay: 600  },
+            { label: "Syncing with Gemini",      progress: 52,  delay: 1400 },
+            { label: "Generating interface",     progress: 80,  delay: 2200 },
+            { label: "IdeaForgr AI — Ready",     progress: 100, delay: 3000, ready: true },
+        ];
+
+        const fill   = document.getElementById("progress-fill");
+        const label  = document.getElementById("status-label");
+        const btnWrap = document.getElementById("btn-container");
+
+        steps.forEach((step, i) => {
+            setTimeout(() => {
+
+                fill.style.width = step.progress + "%";
+
+                label.style.opacity = "0";
+                label.style.transform = "translateY(4px)";
+                label.style.transition = "opacity 0.2s, transform 0.2s";
+
+                setTimeout(() => {
+                    label.textContent = step.label;
+                    label.style.opacity = "1";
+                    label.style.transform = "translateY(0)";
+                    if (step.ready) {
+                        label.classList.add("ready");
+                    }
+                }, 200);
+
+                for (let d = 0; d < 4; d++) {
+                    const dot = document.getElementById("dot-" + d);
+                    dot.className = "dot";
+                    if (d < i)      dot.classList.add("done");
+                    else if (d === i) dot.classList.add("active");
+                }
+
+                if (step.ready) {
+                    setTimeout(() => {
+                        btnWrap.classList.add("visible");
+                    }, 400);
+                }
+            }, step.delay);
+        });
+
+        function enterForge() {
+            const btn = document.getElementById("enter-btn");
+            btn.style.transform = "scale(0.95)";
+            btn.style.opacity = "0.7";
+
+            document.body.style.transition = "opacity 0.5s ease";
+            document.body.style.opacity = "0";
+
+            setTimeout(() => {
+                window.location.href = "app.html";
+            }, 500);
+        }
+    </script>
+</body>
+</html>
